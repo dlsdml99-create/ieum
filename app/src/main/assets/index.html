@@ -97,6 +97,9 @@ p{margin:0}
 .feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .feed-in{padding-block:14px 16px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 #feedNote:empty{display:none}
+.empty{display:grid;justify-items:center;gap:6px;text-align:center;padding:40px 12px;color:var(--muted)}
+.empty b{color:var(--ink);font-size:17px}
+.empty .act-b{margin-top:6px;border:1px solid var(--line);border-radius:6px;padding:0 14px}
 .list{display:flex;flex-direction:column;gap:10px}
 .note{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r);font-size:13px;color:var(--muted)}
 .note .i{width:18px;height:18px;margin-top:1px}
@@ -955,10 +958,21 @@ p{margin:0}
     return c;
   }
 
+  let showEx = false;
   function renderFeed() {
     const real = S.items.length > 0;
+    if (real) showEx = false;
     const frag = document.createDocumentFragment();
-    for (const it of (real ? S.items : examples())) frag.append(cardNode(it, !real));
+    if (real) for (const it of S.items) frag.append(cardNode(it, false));
+    else if (showEx) {
+      frag.append(h('div', { class: 'note' }, ic('eye'), h('p', null, '예시 화면이에요. 내 기록이 아니에요.'),
+        h('button', { type: 'button', onclick: () => { showEx = false; renderFeed(); } }, '닫기')));
+      for (const it of examples()) frag.append(cardNode(it, true));
+    } else {
+      frag.append(h('div', { class: 'empty' }, h('b', null, '아직 대화가 없어요'),
+        h('p', null, '아래 듣기·말하기·보기나 자주 쓰는 말을 눌러 시작하세요.'),
+        h('button', { class: 'act-b', type: 'button', onclick: () => { showEx = true; renderFeed(); } }, ic('eye'), h('span', null, '예시 둘러보기'))));
+    }
     feedList.replaceChildren(frag);
   }
   function scrollEnd() { requestAnimationFrame(() => { feed.scrollTop = feed.scrollHeight; }); }

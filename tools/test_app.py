@@ -62,9 +62,14 @@ async def main():
         pg.on('pageerror', lambda e: errs.append('pageerror: %s' % e))
         pg.on('console', lambda m: errs.append('console.%s: %s' % (m.type, m.text)) if m.type in ('error', 'warning') else None)
         await pg.goto(HTML)
-        await pg.wait_for_selector('.card')
+        await pg.wait_for_selector('.empty')
         await pg.wait_for_timeout(500)
         ev = pg.evaluate
+        R['empty_start'] = await ev('[document.querySelectorAll(".card").length, document.querySelector(".empty").textContent]')
+        await pg.screenshot(path=str(OUT / 'app-empty.png'))
+        await pg.click('.empty .act-b'); await pg.wait_for_timeout(200)
+        R['examples_on_tap'] = await ev('[document.querySelectorAll(".card").length, document.querySelector(".note").textContent]')
+        await pg.click('.note button >> text=닫기')
         R['start'] = await ev('''() => ({ ver: document.getElementById('verTxt').textContent, newVer: document.getElementById('verTxt').classList.contains('new'),
           note: document.getElementById('feedNote').textContent.slice(0, 40), cards: document.querySelectorAll('.card').length,
           engine: document.getElementById('engineTxt').textContent, logo: !!document.querySelector('.logo svg') })''')

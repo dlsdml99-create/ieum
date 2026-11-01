@@ -645,6 +645,32 @@ s = swap(s, "  renderLangs();\n  renderNote();\n  renderFeed();",
 
 s = swap(s, "const KEY = 'tongyeok.';", "const KEY = 'ieum.';")
 
+# ---------- first open: empty screen; examples only when asked ----------
+s = swap(s, """  function renderFeed() {
+    const real = S.items.length > 0;
+    const frag = document.createDocumentFragment();
+    for (const it of (real ? S.items : examples())) frag.append(cardNode(it, !real));
+    feedList.replaceChildren(frag);
+  }""", """  let showEx = false;
+  function renderFeed() {
+    const real = S.items.length > 0;
+    if (real) showEx = false;
+    const frag = document.createDocumentFragment();
+    if (real) for (const it of S.items) frag.append(cardNode(it, false));
+    else if (showEx) {
+      frag.append(h('div', { class: 'note' }, ic('eye'), h('p', null, '예시 화면이에요. 내 기록이 아니에요.'),
+        h('button', { type: 'button', onclick: () => { showEx = false; renderFeed(); } }, '닫기')));
+      for (const it of examples()) frag.append(cardNode(it, true));
+    } else {
+      frag.append(h('div', { class: 'empty' }, h('b', null, '아직 대화가 없어요'),
+        h('p', null, '아래 듣기·말하기·보기나 자주 쓰는 말을 눌러 시작하세요.'),
+        h('button', { class: 'act-b', type: 'button', onclick: () => { showEx = true; renderFeed(); } }, ic('eye'), h('span', null, '예시 둘러보기'))));
+    }
+    feedList.replaceChildren(frag);
+  }""")
+s = swap(s, '#feedNote:empty{display:none}', '#feedNote:empty{display:none}\n.empty{display:grid;justify-items:center;gap:6px;text-align:center;padding:40px 12px;color:var(--muted)}\n.empty b{color:var(--ink);font-size:17px}\n.empty .act-b{margin-top:6px;border:1px solid var(--line);border-radius:6px;padding:0 14px}')
+s = swap(s, "      if (rows.length) Object.assign(it, await readRows(rows));", "      if (rows.length) Object.assign(it, await readRows(rows));")
+
 # ---------- nothing from the preview's Claude path may remain ----------
 for bad in ['askJSON', 'samplePromise', 'promptPhoto', 'promptAddr', 'promptAuto', 'promptDirected', 'speechSynthesis', 'SpeechRecognition', 'claude.use', 'fonts.googleapis', '미리보기']:
     if bad in s:
