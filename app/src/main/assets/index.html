@@ -123,6 +123,14 @@ p{margin:0}
 .trans.long{font-size:17px}
 .err{font-size:14px;font-weight:500;padding-block:2px}
 .acts{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 0 -8px}
+.ffind{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+.ffind-in{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--card,transparent)}
+.ffind-in input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:14px;color:inherit;outline:none}
+.ffind-star{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-weight:700;white-space:nowrap}
+.ffind-star[aria-pressed="true"]{background:var(--sign,#F5B400);border-color:var(--sign,#F5B400);color:#1a1405}
+.ffind-star[aria-pressed="true"] svg,.act-b.on svg{fill:currentColor}
+.act-b.on{font-weight:700}
+.fnone{padding:24px 8px;text-align:center;font-size:14px;opacity:.75}
 .act-b{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 8px;border-radius:4px;font-size:13px;font-weight:500}
 .act-b .i{width:18px;height:18px}
 .act-b em{font-style:normal;font-family:var(--f-sign);font-weight:700;background:var(--sign);color:var(--on-sign);border-radius:3px;padding:0 5px;line-height:18px}
@@ -252,6 +260,7 @@ p{margin:0}
 .big.sos .big-say{background:var(--on-rec);color:var(--rec)}
 .big.sos .big-say.alt{background:transparent;color:inherit}
 .sos-lines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.sos-lang{align-self:flex-start;min-height:36px;padding:4px 12px;border-radius:999px;border:1.5px solid var(--rec-line);font-weight:700;font-size:13px;margin-bottom:6px}
 .sos-b{min-height:44px;padding:6px 10px;border-radius:var(--r);border:1.5px solid var(--rec-line);font-weight:700;font-size:14px;text-align:left}
 .sos-b.on{background:var(--on-rec);color:var(--rec);border-color:var(--on-rec)}
 .sos-nums{display:grid;gap:2px;border-top:2px solid var(--rec-line);padding-top:8px}
@@ -366,6 +375,10 @@ p{margin:0}
   <main class="feed" id="feed">
     <div class="wrap feed-in">
       <div id="feedNote"></div>
+      <div class="ffind" id="fFind" hidden>
+        <label class="ffind-in"><svg class="i" data-ic="search"></svg><input id="fQ" type="search" placeholder="기록에서 찾기" aria-label="번역 기록에서 찾기" autocomplete="off"></label>
+        <button class="ffind-star" id="fStar" type="button" aria-pressed="false"><svg class="i" data-ic="star"></svg><span>즐겨찾기</span></button>
+      </div>
       <div class="list" id="feedList"></div>
     </div>
   </main>
@@ -573,6 +586,10 @@ p{margin:0}
   const SOS_BY = Object.fromEntries(SOS_COUNTRIES.map((c) => [c.code, c]));
   const COUNTRY_BY_LANG = { en: 'US', ja: 'JP', zh: 'CN', vi: 'VN', th: 'TH', id: 'ID', ms: 'MY', tl: 'PH', es: 'ES', fr: 'FR', de: 'DE',
     it: 'IT', pt: 'PT', ru: 'RU', tr: 'TR', ar: 'AE', hi: 'IN', nl: 'NL' };
+  /* 위급 카드는 '지금 있는 나라' 말로 (현지 사람·경찰이 바로 읽게). 영어권·여러 언어 나라는 영어 */
+  const LANG_BY_COUNTRY = { JP: 'ja', CN: 'zh', TW: 'zh', HK: 'zh', MO: 'zh', VN: 'vi', TH: 'th', PH: 'en', ID: 'id', MY: 'ms', SG: 'en',
+    KH: 'en', LA: 'en', IN: 'en', AE: 'ar', TR: 'tr', US: 'en', GU: 'en', CA: 'en', GB: 'en', FR: 'fr', DE: 'de', IT: 'it', ES: 'es',
+    PT: 'pt', NL: 'nl', CH: 'de', RU: 'ru', AU: 'en', NZ: 'en' };
   const CONSUL = { label: '영사안전콜센터 · 24시간 한국어', show: '+82-2-3210-0404', dial: '+82232100404' };
 
   /* ---------- storage + state ---------- */
@@ -598,7 +615,9 @@ p{margin:0}
   if (!L[S.me]) S.me = 'ko';
   if (!L[S.them] || S.them === S.me) S.them = S.me === 'en' ? 'ko' : 'en';
   { const a = store.get('addr', null); if (a && typeof a === 'object' && str(a.address)) S.addr = { name: str(a.name), address: str(a.address), lang: str(a.lang), ko: str(a.ko), phone: str(a.phone) }; }
-  { const saved = store.get('items', []); if (Array.isArray(saved)) S.items = saved.filter(okItem).slice(-60); }
+  /* 즐겨찾기(★)한 기록은 오래돼도 지우지 않고, 나머지는 최근 것만 남긴다 */
+  const keepRecent = (arr, n) => { const rest = arr.filter((x) => !x.star); const cut = new Set(rest.slice(0, Math.max(0, rest.length - n))); return arr.filter((x) => !cut.has(x)); };
+  { const saved = store.get('items', []); if (Array.isArray(saved)) S.items = keepRecent(saved.filter(okItem), 60); }
   let seq = S.items.reduce((m, it) => Math.max(m, +it.id || 0), 0);
   const blobs = new Map();
   const fullURL = new Map();
@@ -606,6 +625,7 @@ p{margin:0}
 
   function slim(it) {
     const o = { id: it.id, ts: it.ts, kind: it.kind, src: it.src || '', dst: it.dst || '', status: 'done' };
+    if (it.star) o.star = true;
     if (it.kind === 'see') {
       o.lines = it.lines; o.cur = it.cur || '';
       if (it.img) o.img = it.img;
@@ -618,7 +638,7 @@ p{margin:0}
   function save() {
     clearTimeout(saveT);
     saveT = setTimeout(() => {
-      const done = S.items.filter((it) => it.status === 'done').slice(-60).map(slim);
+      const done = keepRecent(S.items.filter((it) => it.status === 'done'), 60).map(slim);
       let imgs = 0;
       for (let i = done.length - 1; i >= 0; i--) {
         if (done[i].kind === 'see' && done[i].img) { if (imgs >= 8) delete done[i].img; else imgs++; }
@@ -654,6 +674,8 @@ p{margin:0}
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
     mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
     alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/>',
   };
   const SVGNS = 'http://www.w3.org/2000/svg';
@@ -910,7 +932,7 @@ p{margin:0}
     c.append(h('div', { class: 'acts' },
       btn('speaker', '읽어주기', () => speak(it.trans, it.dst, key), { 'data-say': key }),
       btn('expand', '크게 보기', () => openBig(it.trans, it.orig, it.dst, it.src)),
-      btn('copy', '복사', () => copyText(it.trans))));
+      btn('copy', '복사', () => copyText(it.trans)), starBtn(it, ex)));
     if (it.kind === 'listen' && it === lastListen() && S.me === 'ko') {
       c.append(h('p', { class: 'kick' }, '바로 대답'),
         h('div', { class: 'replies' }, REPLY_LABELS.map((lab, i) => h('button', { class: 'rchip', type: 'button', onclick: () => reply(i) }, lab))));
@@ -951,16 +973,31 @@ p{margin:0}
     c.append(h('div', { class: 'acts' },
       priced ? h('button', { class: 'act-b', type: 'button', onclick: () => orderSheet(it) }, ic('receipt'), h('span', null, '주문하기'), n ? h('em', null, String(n)) : null) : null,
       overlay ? btn('layers', '사진 위에', () => openLens(it)) : null,
-      btn('copy', '복사', () => copyText(it.lines.map((l) => l.o + '\n' + l.t).join('\n\n')))));
+      btn('copy', '복사', () => copyText(it.lines.map((l) => l.o + '\n' + l.t).join('\n\n'))), starBtn(it, ex)));
     return c;
   }
 
   let showEx = false;
+  /* 기록 찾기 · 즐겨찾기 */
+  let fQ = '', fOnlyStar = false;
+  function starBtn(it, ex) {
+    if (ex) return null;
+    const b = btn('star', it.star ? '즐겨찾기 됨' : '즐겨찾기', () => { it.star = !it.star; save(); renderFeed(); toast(it.star ? '즐겨찾기에 넣었어요. 오래돼도 지워지지 않아요.' : '즐겨찾기에서 뺐어요.'); }, { 'aria-pressed': String(!!it.star) });
+    if (it.star) b.classList.add('on');
+    return b;
+  }
   function renderFeed() {
     const real = S.items.length > 0;
     if (real) showEx = false;
     const frag = document.createDocumentFragment();
-    if (real) for (const it of S.items) frag.append(cardNode(it, false));
+    $('#fFind').hidden = !real;
+    if (real) {
+      const q = fQ.trim().toLowerCase();
+      const hit = (it) => (!fOnlyStar || it.star) && (!q || [it.orig, it.trans].concat((it.lines || []).flatMap((l) => [l.o, l.t])).some((t) => String(t || '').toLowerCase().includes(q)));
+      const shown = S.items.filter(hit);
+      for (const it of shown) frag.append(cardNode(it, false));
+      if (!shown.length) frag.append(h('p', { class: 'fnone' }, fOnlyStar && !q ? '즐겨찾기한 기록이 없어요. 기록 아래 ☆를 눌러 보세요.' : '찾는 기록이 없어요.'));
+    }
     else if (showEx) {
       frag.append(h('div', { class: 'note' }, ic('eye'), h('p', null, '예시 화면이에요. 내 기록이 아니에요.'),
         h('button', { type: 'button', onclick: () => { showEx = false; renderFeed(); } }, '닫기')));
@@ -977,7 +1014,7 @@ p{margin:0}
   function addItem(it) {
     it.id = ++seq; it.ts = Date.now();
     S.items.push(it);
-    if (S.items.length > 80) S.items.splice(0, S.items.length - 80);
+    if (S.items.length > 80) S.items = keepRecent(S.items, 80);
     renderFeed(); scrollEnd(); save();
     return it;
   }
@@ -1622,7 +1659,7 @@ p{margin:0}
   function sosNums(c) {
     const box = h('div', { class: 'sos-nums' },
       h('div', { class: 'sos-head' }, h('span', null, '긴급 전화'),
-        h('button', { class: 'sos-country', type: 'button', 'aria-label': '나라 바꾸기 (지금 ' + c.ko + ')', onclick: () => countrySheet((nc) => box.replaceWith(sosNums(nc))) }, c.ko, ic('chev'))));
+        h('button', { class: 'sos-country', type: 'button', 'aria-label': '나라 바꾸기 (지금 ' + c.ko + ')', onclick: () => countrySheet(() => showSOS()) }, c.ko, ic('chev'))));
     for (const [lab, num] of c.nums) {
       box.append(h('button', { class: 'sos-num', type: 'button', onclick: () => dialNum(num) }, h('span', null, lab), h('b', null, num)));
     }
@@ -1630,8 +1667,17 @@ p{margin:0}
     return box;
   }
   async function showSOS() {
-    const lang = S.them;
+    const local = LANG_BY_COUNTRY[sosCountry().code];
+    let lang = local && L[local] && local !== 'ko' ? local : S.them;
     let pb = pbGet(lang), idx = 0;
+    /* 현지어와 상대 언어가 다르면 둘 중에 고를 수 있게 */
+    const alt = lang !== S.them && S.them !== 'ko' ? S.them : null;
+    const langBtn = alt ? h('button', { class: 'sos-lang', type: 'button', onclick: async () => {
+      lang = lang === local ? alt : local; pb = pbGet(lang);
+      langBtn.textContent = (lang === local ? '현지어 ' : '상대 언어 ') + L[lang].native + ' · 바꾸기';
+      pick(idx, false);
+      if (!pb && !engineOff()) { try { pb = await ensurePB(lang); pick(idx, false); } catch (e) { sub.textContent = '번역을 못 불러와서 한국어로 보여줘요.'; } }
+    } }, '현지어 ' + L[lang].native + ' · 바꾸기') : null;
     const main = h('p', { class: 'big-trans' });
     const sub = h('p', { class: 'big-orig' });
     const btns = SOS_LABELS.map((lab, i) => h('button', { class: 'sos-b', type: 'button', onclick: () => pick(i, true) }, lab));
@@ -1643,7 +1689,7 @@ p{margin:0}
       btns.forEach((b, j) => b.classList.toggle('on', j === i));
       if (say) speak(t, pb ? lang : 'ko', 'sos');
     }
-    openBoard({ tone: 'sos', label: '위급 카드', body: [main, sub, h('div', { class: 'sos-lines' }, btns), sosNums(sosCountry())],
+    openBoard({ tone: 'sos', label: '위급 카드 · ' + sosCountry().ko + (L[lang] ? ' ' + L[lang].native : ''), body: [langBtn, main, sub, h('div', { class: 'sos-lines' }, btns), sosNums(sosCountry())].filter(Boolean),
       foot: [footBtn('speaker', '크게 읽어주기', () => speak(main.textContent, pb ? lang : 'ko', 'sos'), 'sos')] });
     pick(0, false);
     if (!pb && !engineOff()) {
@@ -1853,6 +1899,8 @@ p{margin:0}
   }
 
   /* ---------- wire up ---------- */
+  $('#fQ').addEventListener('input', (e) => { fQ = e.target.value; renderFeed(); });
+  $('#fStar').addEventListener('click', (e) => { fOnlyStar = !fOnlyStar; e.currentTarget.setAttribute('aria-pressed', String(fOnlyStar)); renderFeed(); });
   document.querySelectorAll('svg[data-ic]').forEach((s) => {
     s.setAttribute('viewBox', '0 0 24 24');
     s.setAttribute('aria-hidden', 'true');
@@ -1926,7 +1974,7 @@ p{margin:0}
 })();
 </script>
 <!--APPINFO--><script>
-window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요."};
+window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요."};
 window.APP_INFO.online=!!window.Ieum;
 window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){return '1.8'}};
 </script>
