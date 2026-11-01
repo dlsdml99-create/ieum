@@ -1,0 +1,32 @@
+# 다운로드·설명서 페이지만 다시 올리기 (앱은 다시 빌드하지 않음): site 폴더를 고치거나 직접 실행할 때
+name: 이음 다운로드 페이지
+on:
+  push:
+    branches: [main]
+    paths: ['site/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency: { group: pages, cancel-in-progress: false }
+jobs:
+  site:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: 최신 버전 번호로 페이지 채우기
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          N=$(gh release view --json tagName -q .tagName | tr -dc 0-9)
+          MB=$(gh release view --json assets -q '.assets[] | select(.name=="ieum.apk") | .size' | awk '{printf "%d", $1/1048576}')
+          sed -i "s/__N__/$N/g; s/__MB__/$MB/g" site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+  pages:
+    needs: site
+    runs-on: ubuntu-24.04
+    environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
