@@ -768,11 +768,8 @@ p{margin:0}
   let latestInfo = null;
   function onLatest(o) {
     latestInfo = o;
-    const v = $('#verTxt');
-    const newer = +o.latest > +o.current;
-    v.textContent = VER + (newer ? ' · 새 버전 v1.' + o.latest : ' · 최신');
-    v.classList.toggle('new', newer);
-    v.onclick = newer ? () => { try { NB.openUpdate(); } catch (e) { /* ignore */ } } : null;
+    /* 버전 글씨·앱 정보 창은 아래 공통 모듈(APPINFO)이 그린다: 새 버전이 있으면 노란색 */
+    if (window.AppInfo && o && o.latest) window.AppInfo.native('1.' + o.latest);
   }
 
   /* phrasebook: one request per language, kept on the phone */
@@ -1928,4 +1925,159 @@ p{margin:0}
   }
 })();
 </script>
+<!--APPINFO--><script>
+window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요."};
+window.APP_INFO.online=!!window.Ieum;
+window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){return '1.8'}};
+</script>
+<script>
+/* ───── 앱 정보 창 (모든 앱 공통) ─────
+   왼쪽 아래 버전을 누르면: 앱 이름·버전, 최신인지, 새 버전 확인, 업데이트 내용, 개인정보.
+   새 버전이 있으면 버전 글씨가 노란색으로 바뀐다.
+   설정: window.APP_INFO = { name, repo, version, online, mount, notes:[{v,d,items}], privacy }
+   - version: '1.8' 또는 함수. 'current'인 업데이트 항목은 지금 버전으로 표시
+   - online: 앱(APK) 안이면 true. 미리보기에서는 인터넷을 쓰지 않음
+   - mount: 이미 있는 버전 글씨의 CSS 선택자 (없으면 왼쪽 아래에 새로 만듦)
+   새 버전 확인은 GitHub 공개 릴리스 정보만 읽는다 (보내는 정보 없음). */
+(function () {
+  'use strict';
+  var C = window.APP_INFO;
+  if (!C || window.AppInfo) return;
+  var KEY = 'appinfo.' + C.repo;
+  var YELLOW = '#F5B400';
+  var norm = function (v) { v = String(v == null ? '' : v).trim().replace(/^v/i, ''); return /^\d+$/.test(v) ? '1.' + v : v; };
+  var cmp = function (a, b) {
+    var x = norm(a).split('.').map(function (n) { return parseInt(n, 10) || 0; });
+    var y = norm(b).split('.').map(function (n) { return parseInt(n, 10) || 0; });
+    for (var i = 0; i < Math.max(x.length, y.length); i++) { var d = (x[i] || 0) - (y[i] || 0); if (d) return d; }
+    return 0;
+  };
+  var cur = function () { try { return norm(typeof C.version === 'function' ? C.version() : C.version); } catch (e) { return '0'; } };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var latest = null, checking = false, failed = false;
+  try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.v) latest = s; } catch (e) { /* 저장 공간 없음 */ }
+  var hasUpdate = function () { return !!(latest && latest.v && cmp(latest.v, cur()) > 0); };
+
+  /* 버전 글씨 */
+  var label = C.mount ? document.querySelector(C.mount) : null;
+  if (!label) {
+    label = document.createElement('button');
+    label.type = 'button';
+    label.style.cssText = 'position:fixed;left:calc(8px + env(safe-area-inset-left,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));z-index:30;border:0;background:transparent;padding:4px 6px;font:600 11px ui-monospace,Menlo,monospace;color:#7a8594;cursor:pointer';
+    document.body.appendChild(label);
+  }
+  var baseColor = '';
+  label.setAttribute('role', 'button');
+  label.tabIndex = 0;
+  label.style.cursor = 'pointer';
+  label.style.pointerEvents = 'auto';
+  function paint() {
+    label.textContent = 'v' + cur();
+    if (hasUpdate()) {
+      if (!baseColor) baseColor = label.style.color || '';
+      label.style.color = YELLOW;
+      label.style.fontWeight = '800';
+      label.style.textShadow = '0 0 1px rgba(0,0,0,.35)';
+      label.setAttribute('aria-label', '버전 v' + cur() + ', 새 버전 v' + norm(latest.v) + '이 나왔어요');
+      label.title = '새 버전이 나왔어요';
+    } else {
+      label.style.color = baseColor;
+      label.style.fontWeight = '';
+      label.style.textShadow = '';
+      label.setAttribute('aria-label', '버전 v' + cur() + ', 앱 정보와 업데이트 내용');
+      label.title = '';
+    }
+  }
+  label.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); open(); }, true);
+  label.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+
+  /* 정보 창 (앱 화면 스타일과 섞이지 않게 따로 그림) */
+  var host = document.createElement('div');
+  host.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:none';
+  document.body.appendChild(host);
+  var root = host.attachShadow ? host.attachShadow({ mode: 'open' }) : host;
+  var CSS = ':host{all:initial}' +
+    '.w{--bg:#fff;--ink:#16202b;--ink2:#4a5664;--ink3:#7a8594;--line:#dfe5ea;--pill:#dcefe6;--pillInk:#1f6b4c;--btn:#f2f5f7;--main:#16202b;--mainInk:#fff;--yellow:#F5B400;' +
+    'font:15px/1.55 system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:var(--ink);position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center}' +
+    '@media (prefers-color-scheme:dark){.w{--bg:#18212b;--ink:#e8edf2;--ink2:#b3bec9;--ink3:#8a96a3;--line:#2b3744;--pill:#173a2c;--pillInk:#7fd3ac;--btn:#222d38;--main:#e8edf2;--mainInk:#101820}}' +
+    '.scrim{position:absolute;inset:0;background:rgba(10,15,20,.45)}' +
+    '.sheet{position:relative;width:100%;max-width:520px;max-height:88%;overflow-y:auto;background:var(--bg);border-radius:24px 24px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.18);' +
+    'padding:10px max(20px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));box-sizing:border-box}' +
+    '.grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:2px auto 14px}' +
+    '.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}' +
+    'h2{margin:6px 0 0;font-size:24px;font-weight:800;letter-spacing:-.01em}' +
+    '.vtag{display:inline-block;margin-left:10px;padding:3px 10px;border-radius:999px;background:var(--pill);color:var(--pillInk);font:700 15px ui-monospace,Menlo,monospace;vertical-align:4px}' +
+    '.vtag.up{background:rgba(245,180,0,.18);color:var(--yellow)}' +
+    '.x{border:0;background:transparent;color:var(--ink2);font-size:30px;line-height:1;width:44px;height:44px;border-radius:12px;cursor:pointer}' +
+    '.msg{margin:6px 0 14px;color:var(--ink2)}.msg b{color:var(--yellow)}' +
+    '.row{display:flex;gap:8px;flex-wrap:wrap}' +
+    '.btn{appearance:none;border:1px solid var(--line);background:var(--btn);color:var(--ink);border-radius:14px;padding:12px 18px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}' +
+    '.btn.main{background:var(--yellow);border-color:var(--yellow);color:#1a1405}' +
+    '.btn[disabled]{opacity:.6}' +
+    '.lbl{margin:22px 0 4px;font-size:15px;font-weight:800;color:var(--ink2)}' +
+    'ul.notes{list-style:none;margin:0;padding:0}' +
+    'ul.notes>li{padding:12px 0;border-bottom:1px solid var(--line)}ul.notes>li:last-child{border-bottom:0}' +
+    '.nh{display:flex;align-items:baseline;gap:10px}.nh b{font:800 16px ui-monospace,Menlo,monospace}.nh span{color:var(--ink3);font-size:14px}' +
+    'ul.notes ul{margin:6px 0 0;padding-left:20px;list-style:circle;color:var(--ink2)}ul.notes ul li{margin:2px 0}' +
+    '.hint{margin:0;color:var(--ink2)}' +
+    'button:focus-visible,a:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}';
+  var isOpen = false;
+  function statusHTML() {
+    if (!C.online) return '미리보기에서는 새 버전을 확인하지 않아요. 앱에서는 자동으로 확인해요.';
+    if (checking) return '새 버전을 확인하는 중이에요…';
+    if (hasUpdate()) return '새 버전 <b>v' + esc(norm(latest.v)) + '</b>이 나왔어요.';
+    if (failed && !latest) return '새 버전을 확인하지 못했어요. 인터넷 연결을 확인해 주세요.';
+    return latest ? '지금 쓰는 버전이 최신이에요.' : '새 버전 확인을 눌러 주세요.';
+  }
+  function render() {
+    var up = hasUpdate();
+    var notes = (C.notes || []).map(function (n) {
+      var v = n.v === 'current' ? 'v' + cur() : n.v;
+      return '<li><div class="nh"><b>' + esc(v) + '</b><span>' + esc(n.d || '') + '</span></div><ul>' +
+        (n.items || []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></li>';
+    }).join('');
+    root.innerHTML = '<style>' + CSS + '</style><div class="w"><div class="scrim" data-x></div>' +
+      '<div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(C.name) + ' 앱 정보" tabindex="-1">' +
+      '<div class="grab"></div><div class="head"><h2>' + esc(C.name) + '<span class="vtag' + (up ? ' up' : '') + '">v' + esc(cur()) + '</span></h2>' +
+      '<button class="x" type="button" data-x aria-label="닫기">×</button></div>' +
+      '<p class="msg">' + statusHTML() + '</p>' +
+      '<div class="row">' + (up && latest.url ? '<a class="btn main" href="' + esc(latest.url) + '" target="_blank" rel="noopener">업데이트 받기</a>' : '') +
+      (C.online ? '<button class="btn" type="button" data-chk' + (checking ? ' disabled' : '') + '>새 버전 확인</button>' : '') + '</div>' +
+      '<p class="lbl">업데이트 내용</p><ul class="notes">' + notes + '</ul>' +
+      '<p class="lbl">개인정보</p><p class="hint">' + esc(C.privacy || '') + '</p></div></div>';
+    root.querySelectorAll('[data-x]').forEach(function (b) { b.addEventListener('click', close); });
+    var c = root.querySelector('[data-chk]');
+    if (c) c.addEventListener('click', function () { check(true); });
+  }
+  function open() { isOpen = true; host.style.display = 'block'; render(); var sh = root.querySelector('.sheet'); if (sh) sh.focus(); if (C.online && !checking && (!latest || Date.now() - (latest.at || 0) > 600000)) check(false); }
+  function close() { isOpen = false; host.style.display = 'none'; root.innerHTML = ''; try { label.focus(); } catch (e) { /* 무시 */ } }
+  document.addEventListener('keydown', function (e) { if (isOpen && e.key === 'Escape') close(); });
+  /* 뒤로 가기 키: 창이 열려 있으면 창부터 닫음 (앱이 나중에 onBackKey를 바꿔도 유지) */
+  var prevBack = window.onBackKey;
+  Object.defineProperty(window, 'onBackKey', { configurable: true, get: function () { return wrapped; }, set: function (f) { prevBack = f; } });
+  function wrapped() { if (isOpen) { close(); return true; } return typeof prevBack === 'function' ? prevBack.apply(this, arguments) : false; }
+
+  function check(manual) {
+    if (!C.online || checking) return;
+    checking = true; failed = false; if (isOpen) render();
+    var done = function () { checking = false; paint(); if (isOpen) render(); };
+    fetch('https://api.github.com/repos/' + C.repo + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+      .then(function (j) {
+        var url = j.html_url || ('https://github.com/' + C.repo + '/releases/latest');
+        (j.assets || []).forEach(function (a) { if (/\.apk$/i.test(a.name) && /^https:\/\/github\.com\//.test(a.browser_download_url)) url = a.browser_download_url; });
+        if (j.tag_name) { latest = { v: norm(j.tag_name), url: url, at: Date.now() }; try { localStorage.setItem(KEY, JSON.stringify(latest)); } catch (e) { /* 무시 */ } }
+        done();
+      })
+      .catch(function () { failed = true; done(); });
+  }
+  /* 폰(앱)이 확인한 최신 버전을 알려줄 때 */
+  function native(v) { if (v) { latest = { v: norm(v), url: (latest && latest.url) || ('https://github.com/' + C.repo + '/releases/latest'), at: Date.now() }; try { localStorage.setItem(KEY, JSON.stringify(latest)); } catch (e) { /* 무시 */ } paint(); } }
+
+  window.AppInfo = { open: open, check: check, native: native, refresh: paint };
+  paint();
+  if (C.online && (!latest || Date.now() - (latest.at || 0) > 6 * 3600000)) setTimeout(function () { check(false); }, 1500);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && C.online && latest && Date.now() - (latest.at || 0) > 6 * 3600000) check(false); });
+})();
+</script><!--/APPINFO-->
 </body></html>
