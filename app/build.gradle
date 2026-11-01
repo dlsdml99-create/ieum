@@ -34,7 +34,11 @@ android {
         }
     }
     lint { checkReleaseBuilds false; abortOnError false }
-    packagingOptions { resources { excludes += ['META-INF/*.version', 'META-INF/*.kotlin_module', 'kotlin/**', 'DebugProbesKt.bin'] } }
+    packagingOptions {
+        resources { excludes += ['META-INF/*.version', 'META-INF/*.kotlin_module', 'kotlin/**', 'DebugProbesKt.bin'] }
+        // 번역 엔진(.so)을 압축해서 넣기: 받는 파일이 약 15MB 작아짐
+        jniLibs { useLegacyPackaging true }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
