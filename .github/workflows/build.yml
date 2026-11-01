@@ -3,12 +3,14 @@ name: 이음 APK 만들기
 on:
   push:
     branches: [main]
-    paths-ignore: ['README.md', 'site/**', '.github/workflows/pages.yml']
+    paths-ignore: ['README.md', 'site/**', '.github/**']
   workflow_dispatch:
 permissions:
   contents: write
   pages: write
   id-token: write
+# 앱 빌드와 페이지만 올리기가 동시에 돌면 페이지가 예전 버전으로 덮일 수 있어 차례로 실행
+concurrency: { group: release, cancel-in-progress: false }
 jobs:
   build:
     runs-on: ubuntu-24.04
