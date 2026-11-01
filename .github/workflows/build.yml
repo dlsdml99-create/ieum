@@ -1,0 +1,74 @@
+# [이음용] build.yml - dlsdml99-create/ieum 저장소 전용
+name: 이음 APK 만들기
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 저장소 확인
+        run: |
+          if [ "${{ github.repository }}" != "dlsdml99-create/ieum" ]; then
+            echo "::error::이 build.yml은 이음(ieum) 저장소용이에요."
+            exit 1
+          fi
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '8.7'
+      - name: 버전 정하기
+        run: echo "VER=$(( ${{ github.run_number }} + 3 ))" >> "$GITHUB_ENV"
+      - name: Build APK
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          KEY_PASS: ${{ secrets.IEUM_KEY }}
+        run: |
+          set -o pipefail
+          if [ -z "$KEY_PASS" ]; then
+            echo "::error::서명 비밀값(IEUM_KEY)이 없어요. 저장소 Settings → Secrets and variables → Actions 에서 넣어 주세요." | tee build.log
+            exit 1
+          fi
+          printf '%s' "$KEY_PASS" > "$RUNNER_TEMP/kp"
+          openssl enc -d -aes-256-cbc -pbkdf2 -in app/ieum.jks.enc -out app/ieum.jks -pass file:"$RUNNER_TEMP/kp"
+          rm -f "$RUNNER_TEMP/kp"
+          gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
+          rm -f app/ieum.jks
+          cp app/build/outputs/apk/release/app-release.apk ieum.apk
+          ls -la ieum.apk
+      - name: 빌드 기록 남기기 (실패했을 때만)
+        if: failure()
+        run: |
+          mkdir -p /tmp/lg && cp build.log /tmp/lg/ 2>/dev/null || echo "no log" > /tmp/lg/build.log
+          cd /tmp/lg && git init -q -b build-log && git add . && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm "build log ${{ github.run_number }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" build-log
+      - name: Publish APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          MB=$(du -m ieum.apk | cut -f1)
+          sed -i "s/__N__/$VER/g; s/__MB__/$MB/g" notes.md site/index.html
+          gh release delete "v$VER" --yes --cleanup-tag || true
+          gh release create "v$VER" ieum.apk --latest --title "이음 v1.$VER" --notes-file notes.md
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+  pages:
+    needs: build
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

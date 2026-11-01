@@ -1,0 +1,1795 @@
+<title>이음</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#1E2125">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one-screen wayfinding board. Graphite sign band (tools + languages) on top, the conversation in the middle, three yellow signs (ear · mouth · eye) as the dock. Full-screen boards for showing things to the other person. */
+:root{
+  --bg:#EDEDE7;
+  --surface:#FFFFFF;
+  --ink:#16181B;
+  --muted:#5B605D;
+  --line:#D2D3CB;
+  --sign:#FFCC00;
+  --on-sign:#16181B;
+  --sign-muted:#5C4B00;
+  --sign-hover:rgba(22,24,27,.09);
+  --board:#1E2125;
+  --on-board:#F2F2EC;
+  --board-muted:#A6AAAE;
+  --board-line:rgba(255,255,255,.13);
+  --board-hover:rgba(255,255,255,.08);
+  --blue:#1C5DAE;
+  --rec:#D63A1E;
+  --on-rec:#FFFFFF;
+  --rec-line:rgba(255,255,255,.55);
+  --rec-shade:rgba(0,0,0,.2);
+  --sos-ink:#FF6A4D;
+  --lens:#0C0D0F;
+  --on-lens:#F2F2EC;
+  --scrim:rgba(10,12,14,.5);
+  --shadow:0 8px 28px rgba(0,0,0,.22);
+  --tag-shadow:0 1px 4px rgba(0,0,0,.4);
+  --f-sign:"Barlow Semi Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101214;--surface:#1A1D20;--ink:#ECEDE7;--muted:#9EA3A0;--line:#2C3034;
+    --board:#24282D;--board-line:rgba(255,255,255,.1);
+    --blue:#7DAEEE;--rec:#E2472B;--scrim:rgba(0,0,0,.62);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101214;--surface:#1A1D20;--ink:#ECEDE7;--muted:#9EA3A0;--line:#2C3034;
+  --board:#24282D;--board-line:rgba(255,255,255,.1);
+  --blue:#7DAEEE;--rec:#E2472B;--scrim:rgba(0,0,0,.62);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%}
+body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--board);z-index:10}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-user-select:none;user-select:none}
+button:disabled{cursor:default}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+p{margin:0}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+.app{height:100%;display:flex;flex-direction:column}
+.wrap{width:100%;max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.grow{flex:1}
+
+/* sign band */
+.top{flex:none;background:var(--board);color:var(--on-board)}
+.top .wrap{padding-block:4px 10px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.brand{display:flex;align-items:center;gap:8px;min-height:46px}
+.mark{width:28px;height:28px;border-radius:4px;background:var(--sign);color:var(--on-sign);display:grid;place-items:center;flex:none}
+.mark .i{width:18px;height:18px;stroke-width:2.6}
+.mark.sm{width:20px;height:20px;border-radius:3px}
+.mark.sm .i{width:13px;height:13px}
+.brand h1{margin:0;font-size:20px;line-height:1;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.tools{display:flex;gap:2px;flex:none}
+.tool{width:44px;height:46px;display:grid;justify-items:center;align-content:center;gap:3px;border-radius:var(--r);color:var(--on-board)}
+.tool .i{width:20px;height:20px}
+.tool span{font-size:10px;line-height:1;color:var(--board-muted);white-space:nowrap;letter-spacing:-.02em}
+.tool.sos b{font-family:var(--f-sign);font-weight:700;font-size:16px;line-height:20px;letter-spacing:.04em;color:var(--sos-ink)}
+.langs{display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);align-items:center;gap:6px}
+.plate{display:flex;align-items:center;gap:8px;min-width:0;height:46px;padding:0 10px;border-radius:var(--r);border:1px solid var(--board-line);text-align:left}
+.who{font-size:12px;color:var(--board-muted);flex:none}
+.code{font-family:var(--f-sign);font-weight:700;font-size:24px;line-height:1;color:var(--sign);letter-spacing:.02em;flex:none}
+.nm{font-weight:500;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plate .chev{width:16px;height:16px;color:var(--board-muted)}
+.arrows{width:36px;height:46px;border-radius:var(--r);color:var(--sign);display:grid;place-items:center}
+.arrows .i{width:22px;height:22px;transition:transform .3s ease}
+.arrows.spin .i{transform:rotate(180deg)}
+@media (hover:hover){.arrows:hover{background:var(--board-hover)}}
+
+/* conversation */
+.feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.feed-in{padding-block:14px 16px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+#feedNote:empty{display:none}
+.list{display:flex;flex-direction:column;gap:10px}
+.note{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r);font-size:13px;color:var(--muted)}
+.note .i{width:18px;height:18px;margin-top:1px}
+.note p{flex:1;min-width:0}
+.note button{flex:none;font-size:13px;font-weight:700;color:var(--ink);padding:2px 4px}
+.card{border-radius:var(--r);padding:11px 14px 8px;display:grid;gap:3px;min-width:0}
+.card.speak{background:var(--sign);color:var(--on-sign);margin-left:10%}
+.card.listen{background:var(--board);color:var(--on-board);border:1px solid var(--board-line);margin-right:10%}
+.card.see{background:var(--surface);border:1px solid var(--line)}
+.card-h{display:flex;align-items:center;gap:8px;min-height:24px;font-size:12px;font-weight:700}
+.card-h .i{width:16px;height:16px}
+.route{font-family:var(--f-sign);font-weight:600;font-size:13px;letter-spacing:.06em}
+.ex{margin-left:auto;font-size:11px;font-weight:500;padding:0 6px;border:1px solid currentColor;border-radius:3px;opacity:.65}
+.cur-chip{margin-left:auto;display:inline-flex;align-items:center;gap:2px;height:24px;padding:0 4px 0 7px;border-radius:3px;background:var(--board);color:var(--sign);font-family:var(--f-sign);font-weight:700;font-size:13px;letter-spacing:.04em}
+.cur-chip .i{width:14px;height:14px}
+.cur-chip ~ .ex{margin-left:0}
+.orig{font-size:14px;overflow-wrap:anywhere}
+.card.speak .orig{color:var(--sign-muted)}
+.card.listen .orig{color:var(--board-muted)}
+.trans{font-size:19px;line-height:1.38;font-weight:700;overflow-wrap:anywhere}
+.trans.long{font-size:17px}
+.err{font-size:14px;font-weight:500;padding-block:2px}
+.acts{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 0 -8px}
+.act-b{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 8px;border-radius:4px;font-size:13px;font-weight:500}
+.act-b .i{width:18px;height:18px}
+.act-b em{font-style:normal;font-family:var(--f-sign);font-weight:700;background:var(--sign);color:var(--on-sign);border-radius:3px;padding:0 5px;line-height:18px}
+.kick{font-size:11px;font-weight:700;color:var(--board-muted);margin-top:6px}
+.replies{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.rchip{height:32px;padding:0 11px;border-radius:4px;border:1px solid var(--board-line);color:var(--on-board);font-size:13px;font-weight:500}
+.speaking .w1{animation:wave 1s infinite}
+.speaking .w2{animation:wave 1s .25s infinite}
+@keyframes wave{0%,100%{opacity:.2}50%{opacity:1}}
+.dots{display:inline-flex;gap:5px;align-items:center;height:26px}
+.dots i{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.25;animation:blink 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}
+.dots i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.2}40%{opacity:1}}
+.wait{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.see-pic{display:block;width:100%;padding:0;margin:4px 0 2px;border-radius:4px;overflow:hidden;position:relative}
+.see-img{display:block;width:100%;max-width:100%;height:150px;object-fit:cover;background:var(--bg)}
+.see-img.ph{animation:blink 1.6s infinite;border-radius:4px;margin:4px 0 2px}
+.see-pic .over{position:absolute;right:6px;bottom:6px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:3px;background:var(--board);color:var(--sign);font-size:12px;font-weight:700}
+.see-pic .over .i{width:14px;height:14px}
+.lines{list-style:none;margin:2px 0 0;padding:0}
+.line{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.line .o,.line .t,.line .pr{grid-column:1;overflow-wrap:anywhere}
+.line .o{font-size:13px;color:var(--muted)}
+.line .t{font-size:16px;font-weight:700}
+.line .pr{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;font-family:var(--f-sign);font-size:14px;font-weight:600;color:var(--muted)}
+.line .pr b{color:var(--ink);font-weight:700}
+.line .say{grid-column:2;grid-row:1/span 3;width:40px;height:40px;display:grid;place-items:center;border-radius:4px;color:var(--muted)}
+
+/* dock */
+.dock{flex:none;background:var(--bg);border-top:1px solid var(--line)}
+.dock .wrap{padding-block:8px 4px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.phrases{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.phrases::-webkit-scrollbar{display:none}
+.chip{flex:none;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:13px;font-weight:500;white-space:nowrap}
+.compose{display:flex;gap:6px;margin:0}
+.field{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:44px;padding:0 4px 0 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.field:focus-within{border-color:var(--ink)}
+.field input{flex:1;width:0;min-width:0;height:100%;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:16px}
+.field input::placeholder{color:var(--muted)}
+.mode-chip{flex:none;display:inline-flex;align-items:center;gap:2px;height:28px;padding:0 2px 0 8px;border-radius:3px;font-size:12px;font-weight:700;white-space:nowrap}
+.mode-chip.speak{background:var(--sign);color:var(--on-sign)}
+.mode-chip.listen{background:var(--board);color:var(--on-board)}
+.mode-chip button{width:24px;height:24px;display:grid;place-items:center}
+.mode-chip .i{width:14px;height:14px}
+.send{flex:none;width:44px;height:44px;border-radius:var(--r);background:var(--board);color:var(--sign);display:grid;place-items:center}
+.send:disabled{opacity:.35}
+.signs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sign{position:relative;min-height:76px;padding:8px 4px 9px;border-radius:8px;background:var(--sign);color:var(--on-sign);display:grid;justify-items:center;align-content:center;gap:3px;transition:transform .12s ease}
+.sign:active{transform:scale(.97)}
+.sign .i{width:28px;height:28px;stroke-width:2.2}
+.sign b{font-size:16px;line-height:1.2}
+.sign small{font-family:var(--f-sign);font-weight:600;font-size:12px;line-height:1;letter-spacing:.06em}
+.sign.rec{background:var(--rec);color:var(--on-rec)}
+.sign.rec::after{content:"";position:absolute;inset:-4px;border:2px solid var(--rec);border-radius:11px;animation:ring 1.3s ease-out infinite;pointer-events:none}
+@keyframes ring{from{opacity:.9;transform:scale(.98)}to{opacity:0;transform:scale(1.06)}}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:18px;font-size:11px;color:var(--muted)}
+.ver{font-family:var(--f-sign);font-weight:600;font-size:12px;letter-spacing:.05em}
+
+/* face to face */
+.face{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;background:var(--board)}
+.half{flex:1;min-height:0;display:flex}
+.half.them{background:var(--sign);color:var(--on-sign);transform:rotate(180deg);padding-bottom:env(safe-area-inset-top,0px)}
+.half.me{background:var(--board);color:var(--on-board);padding-bottom:env(safe-area-inset-bottom,0px)}
+.half-in{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding:14px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
+.fh-lang{font-family:var(--f-sign);font-weight:700;font-size:13px;letter-spacing:.06em;opacity:.7}
+.fh-text{flex:1;font-size:clamp(20px,6vw,30px);font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.fh-sub{font-size:14px;opacity:.72;overflow-wrap:anywhere}
+.fh-sub:empty{display:none}
+.fh-replies{display:flex;flex-wrap:wrap;gap:6px}
+.fh-form{display:flex;gap:6px;margin:0;border-radius:var(--r)}
+.fh-form input{flex:1;width:0;min-width:0;height:46px;border-radius:var(--r);border:1.5px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:16px;padding:0 12px;outline:0}
+.fh-form input::placeholder{color:inherit;opacity:.6}
+.fh-form button{flex:none;width:46px;height:46px;border-radius:var(--r);display:grid;place-items:center}
+.half.them .fh-form button{background:var(--on-sign);color:var(--sign)}
+.half.me .fh-form button{background:var(--sign);color:var(--on-sign)}
+.fh-form.turn{animation:turn .9s ease 2}
+@keyframes turn{50%{box-shadow:0 0 0 6px var(--on-sign)}}
+.fh-mic{flex:none;height:56px;border-radius:28px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:17px}
+.fh-mic .i{width:22px;height:22px}
+.half.them .fh-mic{background:var(--on-sign);color:var(--sign)}
+.half.me .fh-mic{background:var(--sign);color:var(--on-sign)}
+.half .fh-mic.rec{background:var(--rec);color:var(--on-rec)}
+.face-mid{position:relative;z-index:2;flex:none;display:flex;align-items:center;gap:8px;padding:4px max(16px,env(safe-area-inset-right,0px)) 4px max(16px,env(safe-area-inset-left,0px));background:var(--board);color:var(--on-board);border-block:1px solid var(--board-line)}
+.fm-route{font-family:var(--f-sign);font-weight:700;font-size:15px;letter-spacing:.06em;color:var(--sign)}
+.fm-b{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 10px;border-radius:var(--r);font-weight:700;font-size:14px}
+
+/* photo lens */
+.lens{position:fixed;inset:0;z-index:52;display:flex;flex-direction:column;gap:8px;background:var(--lens);color:var(--on-lens);padding:calc(env(safe-area-inset-top,0px) + 6px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px))}
+.lens-bar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lens-t{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.lens-stage{flex:1;min-height:0;display:grid;place-items:center;overflow:hidden}
+.lens-pic{position:relative;max-width:100%}
+.lens-pic img{display:block;width:100%;height:100%;object-fit:contain;border-radius:4px}
+.lens-tags{position:absolute;inset:0}
+.lens-tag{position:absolute;padding:1px 4px;border-radius:3px;background:var(--sign);color:var(--on-sign);font-weight:700;line-height:1.15;text-align:left;box-shadow:var(--tag-shadow);overflow-wrap:anywhere}
+.lens-tag small{font-family:var(--f-sign);font-weight:600;font-size:.85em;white-space:nowrap}
+.lens-foot{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.lens-b{display:inline-flex;align-items:center;gap:6px;height:46px;padding:0 16px;border-radius:23px;border:1.5px solid var(--board-line);font-weight:700}
+.lens-b.main{background:var(--sign);color:var(--on-sign);border-color:var(--sign)}
+.lens-note{font-size:12px;color:var(--board-muted);text-align:center}
+
+/* show to the other person */
+.big{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;gap:12px;background:var(--sign);color:var(--on-sign);padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px,env(safe-area-inset-left,0px))}
+.big.sos{background:var(--rec);color:var(--on-rec)}
+.big-bar{display:flex;justify-content:space-between}
+.big-b{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 10px;border-radius:var(--r);font-weight:700}
+.big-body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:16px;transition:transform .35s ease}
+.big-body>:first-child{margin-top:auto}
+.big-body>:last-child{margin-bottom:auto}
+.big-body.flip{transform:rotate(180deg)}
+.big-kicker{font-size:14px;font-weight:700;opacity:.7}
+.big-lead{font-size:24px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.big-trans{font-weight:700;line-height:1.22;overflow-wrap:anywhere;text-wrap:balance}
+.big-addr{font-size:26px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+.big-orig{font-size:17px;color:var(--sign-muted);overflow-wrap:anywhere}
+.big.sos .big-orig{color:var(--on-rec);opacity:.85}
+.big-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.big-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:6px;border-top:2px solid currentColor;font-size:26px;font-weight:700;line-height:1.25}
+.big-list li span:first-child{min-width:0;overflow-wrap:anywhere}
+.big-list li span:last-child{flex:none;font-family:var(--f-sign)}
+.big-foot{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.big-say{display:inline-flex;align-items:center;gap:8px;height:52px;padding:0 22px;border-radius:26px;background:var(--on-sign);color:var(--sign);font-weight:700;font-size:16px}
+.big-say.alt{background:transparent;color:inherit;border:2px solid currentColor}
+.big.sos .big-say{background:var(--on-rec);color:var(--rec)}
+.big.sos .big-say.alt{background:transparent;color:inherit}
+.sos-lines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.sos-b{min-height:44px;padding:6px 10px;border-radius:var(--r);border:1.5px solid var(--rec-line);font-weight:700;font-size:14px;text-align:left}
+.sos-b.on{background:var(--on-rec);color:var(--rec);border-color:var(--on-rec)}
+.sos-nums{display:grid;gap:2px;border-top:2px solid var(--rec-line);padding-top:8px}
+.sos-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;font-weight:700}
+.sos-country{display:inline-flex;align-items:center;gap:4px;height:36px;padding:0 6px 0 10px;border-radius:4px;background:var(--rec-shade);font-weight:700}
+.sos-country .i{width:16px;height:16px}
+.sos-num{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:4px 0;text-align:left;width:100%}
+.sos-num span{font-size:14px}
+.sos-num b{font-family:var(--f-sign);font-size:30px;line-height:1.1;letter-spacing:.03em;white-space:nowrap}
+.sos-num.consul{flex-direction:column;align-items:flex-start;gap:0;padding-top:8px}
+.sos-num.consul b{font-size:24px}
+
+/* sheets */
+.scrim{position:fixed;inset:0;z-index:60;background:var(--scrim)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;max-height:82%;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border-radius:12px 12px 0 0;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-block:10px 4px}
+.sheet-h h2{margin:0;font-size:17px}
+.sheet-body{overflow-y:auto;padding-block:0 14px}
+.sheet-note{font-size:13px;color:var(--muted);padding-bottom:6px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:8px 2px;border-top:1px solid var(--line);text-align:left}
+.opt:first-child{border-top:0}
+.opt>.i{width:22px;height:22px}
+.opt .tag{flex:none;min-width:40px;padding:3px 4px;border-radius:3px;background:var(--board);color:var(--sign);font-family:var(--f-sign);font-weight:700;font-size:15px;line-height:1.1;text-align:center}
+.opt .k{font-weight:700;white-space:nowrap}
+.opt .n{margin-left:auto;color:var(--muted);font-size:13px;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt .ck{width:18px;height:18px}
+.opt .kn{display:grid;min-width:0}
+.opt .kn small{color:var(--muted);font-size:13px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row-t{flex:1;min-width:0;display:grid}
+.row-t small{color:var(--muted);font-size:13px}
+.sw{flex:none;position:relative;width:48px;height:28px;border-radius:14px;background:var(--line)}
+.sw::after{content:"";position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:left .15s}
+.sw[aria-checked="true"]{background:var(--sign)}
+.sw[aria-checked="true"]::after{left:24px;background:var(--on-sign)}
+.danger{color:var(--rec);font-weight:700;padding:10px 0}
+.about{padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.set-block{display:grid;gap:8px;padding:12px 2px;border-top:1px solid var(--line)}
+.set-block small{color:var(--muted);font-size:13px}
+.widget{width:228px;max-width:100%;padding:10px;border-radius:16px;background:var(--board);color:var(--on-board);display:grid;gap:8px}
+.w-head{display:flex;align-items:center;gap:6px;font-size:13px}
+.w-btns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.w-b{height:58px;border-radius:10px;background:var(--sign);color:var(--on-sign);display:grid;justify-items:center;align-content:center;gap:3px;font-size:12px;font-weight:700}
+.w-b .i{width:20px;height:20px}
+.form{display:grid;gap:8px;margin:0}
+.form label{font-size:13px;font-weight:700}
+.form input,.form textarea{width:100%;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;font-size:16px;padding:10px 12px}
+.form textarea{min-height:88px;resize:vertical}
+.form .save{height:46px;border-radius:var(--r);background:var(--sign);color:var(--on-sign);font-weight:700}
+.o-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.o-row:first-child{border-top:0}
+.o-main{flex:1;min-width:0;display:grid;gap:1px;text-align:left}
+.o-main b{font-size:16px;overflow-wrap:anywhere}
+.o-main small{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.step{flex:none;display:flex;align-items:center;gap:2px}
+.step button{width:38px;height:38px;border-radius:4px;border:1px solid var(--line);display:grid;place-items:center;font-size:20px;font-weight:700;line-height:1}
+.step .q{min-width:26px;text-align:center;font-family:var(--f-sign);font-weight:700;font-size:20px;color:var(--muted)}
+.o-row.on .q{color:var(--ink)}
+.o-row.on .o-main b{text-decoration:underline;text-decoration-color:var(--sign);text-decoration-thickness:4px;text-underline-offset:-1px;text-decoration-skip-ink:none}
+.o-foot{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-top:10px;display:grid;gap:8px}
+.o-total{font-weight:700;font-size:15px}
+.o-total small{color:var(--muted);font-weight:500}
+.o-btns{display:flex;gap:8px}
+.o-btns button{height:46px;border-radius:var(--r);font-weight:700;padding:0 14px}
+.o-clear{border:1px solid var(--line)}
+.o-show{flex:1;background:var(--sign);color:var(--on-sign)}
+.o-show:disabled{opacity:.4}
+
+.toast{position:fixed;z-index:80;top:calc(env(safe-area-inset-top,0px) + 12px);left:50%;transform:translateX(-50%);width:max-content;max-width:min(92vw,460px);padding:10px 14px;border-radius:var(--r);background:var(--board);color:var(--on-board);border:1px solid var(--board-line);box-shadow:var(--shadow);font-size:14px;line-height:1.45;pointer-events:none}
+
+@media (hover:hover){
+  .tool:hover,.plate:hover,.card.listen .act-b:hover,.rchip:hover,.fm-b:hover,.lens-b:not(.main):hover{background:var(--board-hover)}
+  .card.speak .act-b:hover,.big-b:hover{background:var(--sign-hover)}
+  .card.see .act-b:hover,.line .say:hover,.sheet .icon-btn:hover,.step button:hover{background:var(--bg)}
+  .chip:hover{border-color:var(--muted)}
+}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:var(--r)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="wrap">
+      <div class="brand">
+        <span class="mark"><svg class="i" data-ic="swap"></svg></span>
+        <h1>이음</h1>
+        <span class="grow"></span>
+        <div class="tools">
+          <button class="tool" id="tFace" type="button" aria-label="마주보기 모드"><svg class="i" data-ic="face"></svg><span>마주보기</span></button>
+          <button class="tool" id="tAddr" type="button" aria-label="숙소 주소 카드"><svg class="i" data-ic="pin"></svg><span>주소</span></button>
+          <button class="tool sos" id="tSos" type="button" aria-label="위급 카드"><b>SOS</b><span>위급</span></button>
+          <button class="tool" id="btnSet" type="button" aria-label="설정"><svg class="i" data-ic="sliders"></svg><span>설정</span></button>
+        </div>
+      </div>
+      <div class="langs">
+        <button class="plate" id="meBtn" type="button" aria-label="내 언어 바꾸기"><span class="who">나</span><span class="code" id="meCode">KO</span><span class="nm" id="meName">한국어</span><svg class="i chev" data-ic="chev"></svg></button>
+        <button class="arrows" id="swapBtn" type="button" aria-label="내 언어와 상대 언어 바꾸기"><svg class="i" data-ic="swap"></svg></button>
+        <button class="plate" id="themBtn" type="button" aria-label="상대 언어 바꾸기"><span class="who">상대</span><span class="code" id="themCode">EN</span><span class="nm" id="themName">영어</span><svg class="i chev" data-ic="chev"></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="feed" id="feed">
+    <div class="wrap feed-in">
+      <div id="feedNote"></div>
+      <div class="list" id="feedList"></div>
+    </div>
+  </main>
+
+  <footer class="dock">
+    <div class="wrap">
+      <div class="phrases" id="phrases" role="group" aria-label="자주 쓰는 말"></div>
+      <form class="compose" id="compose" autocomplete="off">
+        <div class="field">
+          <span class="mode-chip" id="modeChip" hidden><span id="modeLabel"></span><button type="button" id="modeX" aria-label="입력 방식 되돌리기"><svg class="i" data-ic="close"></svg></button></span>
+          <input id="txt" type="text" enterkeyhint="send" placeholder="글로 써도 돼요 · 언어는 알아서 맞춰요" aria-label="번역할 글">
+        </div>
+        <button class="send" id="sendBtn" type="submit" aria-label="번역하기" disabled><svg class="i" data-ic="send"></svg></button>
+      </form>
+      <div class="signs">
+        <button class="sign" id="btnListen" type="button"><svg class="i" data-ic="ear"></svg><b>듣기</b><small>EN → KO</small></button>
+        <button class="sign" id="btnSpeak" type="button"><svg class="i" data-ic="head"></svg><b>말하기</b><small>KO → EN</small></button>
+        <button class="sign" id="btnSee" type="button"><svg class="i" data-ic="eye"></svg><b>보기</b><small>글자 → KO</small></button>
+      </div>
+      <div class="foot"><span class="ver" id="verTxt">v1.3</span><span id="engineTxt">미리보기 · Claude 번역</span></div>
+    </div>
+  </footer>
+</div>
+
+<div class="face" id="face" hidden role="dialog" aria-modal="true" aria-label="마주보기 모드">
+  <section class="half them">
+    <div class="half-in">
+      <p class="fh-lang" id="fThemLang">EN</p>
+      <p class="fh-text" id="fThemText"></p>
+      <p class="fh-sub" id="fThemSub"></p>
+      <form class="fh-form" id="fThemForm" autocomplete="off"><input id="fThemInput" type="text" enterkeyhint="send" aria-label="상대가 쓰는 칸"><button type="submit" aria-label="보내기"><svg class="i" data-ic="send"></svg></button></form>
+      <button class="fh-mic" id="fThemMic" type="button"><svg class="i" data-ic="mic"></svg><span id="fThemMicLabel"></span></button>
+    </div>
+  </section>
+  <div class="face-mid">
+    <span class="fm-route" id="fRoute">KO ⇄ EN</span>
+    <span class="grow"></span>
+    <button class="fm-b" id="faceClose" type="button"><svg class="i" data-ic="close"></svg><span>닫기</span></button>
+  </div>
+  <section class="half me">
+    <div class="half-in">
+      <p class="fh-lang" id="fMeLang">KO</p>
+      <p class="fh-text" id="fMeText"></p>
+      <p class="fh-sub" id="fMeSub"></p>
+      <div class="fh-replies" id="fMeReplies"></div>
+      <form class="fh-form" id="fMeForm" autocomplete="off"><input id="fMeInput" type="text" enterkeyhint="send" aria-label="내가 쓰는 칸"><button type="submit" aria-label="보내기"><svg class="i" data-ic="send"></svg></button></form>
+      <button class="fh-mic" id="fMeMic" type="button"><svg class="i" data-ic="mic"></svg><span>눌러서 말하기</span></button>
+    </div>
+  </section>
+</div>
+
+<div class="lens" id="lens" hidden role="dialog" aria-modal="true" aria-label="사진 위 번역">
+  <div class="lens-bar">
+    <span class="lens-t"><span class="mark sm"><svg class="i" data-ic="eye"></svg></span><span id="lensTitle">사진 위 번역</span></span>
+    <button class="fm-b" id="lensClose" type="button"><svg class="i" data-ic="close"></svg><span>닫기</span></button>
+  </div>
+  <div class="lens-stage" id="lensStage"><div class="lens-pic" id="lensPic"><img id="lensImg" alt="번역한 사진"><div class="lens-tags" id="lensTags"></div></div></div>
+  <p class="lens-note" id="lensNote"></p>
+  <div class="lens-foot" id="lensFoot"></div>
+</div>
+
+<div class="big" id="big" hidden role="dialog" aria-modal="true" aria-label="크게 보기">
+  <div class="big-bar">
+    <button class="big-b" id="bigFlip" type="button"><svg class="i" data-ic="rotate"></svg><span>뒤집기</span></button>
+    <button class="big-b" id="bigClose" type="button"><svg class="i" data-ic="close"></svg><span>닫기</span></button>
+  </div>
+  <div class="big-body" id="bigBody"></div>
+  <div class="big-foot" id="bigFoot"></div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="wrap sheet-h"><h2 id="sheetTitle"></h2><button class="icon-btn" id="sheetClose" type="button" aria-label="닫기"><svg class="i" data-ic="close"></svg></button></div>
+  <div class="wrap sheet-body" id="sheetBody"></div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fileAlbum" accept="image/*" hidden>
+
+<script>
+(() => {
+  'use strict';
+  const VER = 'v1.3';
+  const $ = (s) => document.querySelector(s);
+  document.documentElement.lang = 'ko';
+
+  /* ---------- languages ---------- */
+  const LANGS = [
+    ['ko', '한국어', '한국어', 'Korean', 'ko-KR'],
+    ['en', '영어', 'English', 'English', 'en-US'],
+    ['ja', '일본어', '日本語', 'Japanese', 'ja-JP'],
+    ['zh', '중국어', '中文', 'Chinese (Simplified)', 'zh-CN'],
+    ['vi', '베트남어', 'Tiếng Việt', 'Vietnamese', 'vi-VN'],
+    ['th', '태국어', 'ไทย', 'Thai', 'th-TH'],
+    ['id', '인도네시아어', 'Bahasa Indonesia', 'Indonesian', 'id-ID'],
+    ['ms', '말레이어', 'Bahasa Melayu', 'Malay', 'ms-MY'],
+    ['tl', '필리핀어', 'Filipino', 'Filipino', 'fil-PH'],
+    ['es', '스페인어', 'Español', 'Spanish', 'es-ES'],
+    ['fr', '프랑스어', 'Français', 'French', 'fr-FR'],
+    ['de', '독일어', 'Deutsch', 'German', 'de-DE'],
+    ['it', '이탈리아어', 'Italiano', 'Italian', 'it-IT'],
+    ['pt', '포르투갈어', 'Português', 'Portuguese', 'pt-PT'],
+    ['ru', '러시아어', 'Русский', 'Russian', 'ru-RU'],
+    ['tr', '튀르키예어', 'Türkçe', 'Turkish', 'tr-TR'],
+    ['ar', '아랍어', 'العربية', 'Arabic', 'ar-SA'],
+    ['hi', '힌디어', 'हिन्दी', 'Hindi', 'hi-IN'],
+    ['nl', '네덜란드어', 'Nederlands', 'Dutch', 'nl-NL'],
+  ].map(([code, ko, native, en, bcp]) => ({ code, ko, native, en, bcp }));
+  const L = Object.fromEntries(LANGS.map((l) => [l.code, l]));
+  const CODE = (c) => (c ? String(c).split('-')[0].toUpperCase() : '··');
+  const nameKo = (c) => (L[c] ? L[c].ko : CODE(c));
+  const langAttr = (c) => (/^[a-z]{2,3}$/.test(c || '') ? c : null);
+  const str = (v) => (typeof v === 'string' ? v.trim() : '');
+  function normCode(s) {
+    s = String(s || '').trim().toLowerCase();
+    if (!s) return '';
+    const base = s.split(/[-_\s]/)[0];
+    if (L[base]) return base;
+    if (base === 'fil') return 'tl';
+    const byName = LANGS.find((l) => l.en.toLowerCase().split(' ')[0] === base);
+    return byName ? byName.code : base.slice(0, 3);
+  }
+
+  /* ---------- ready-made sentences (translated once per language, then instant) ---------- */
+  const PHRASES = ['안녕하세요', '감사합니다', '이거 얼마예요?', '이거 주세요', '화장실 어디예요?', '계산해 주세요',
+    '추천해 주세요', '천천히 말해 주세요', '사진 좀 찍어 주실래요?', '알레르기가 있어요', '도와주세요'];
+  const REPLY_LABELS = ['네', '아니요', '다시 한번요', '천천히요', '감사해요'];
+  const REPLY_FULL = ['네.', '아니요.', '다시 한번 말해 주세요.', '조금 천천히 말해 주세요.', '감사합니다.'];
+  const SOS_LABELS = ['도와주세요', '경찰 불러 주세요', '구급차 불러 주세요', '병원에 데려다 주세요', '길을 잃었어요', '대사관에 연락해 주세요'];
+  const SOS_FULL = ['도와주세요!', '경찰을 불러 주세요.', '구급차를 불러 주세요.', '병원에 데려다 주세요.', '길을 잃었어요.', '한국 대사관에 연락해 주세요.'];
+  const PARTNER_UI = ['안녕하세요! 이 번역기로 이야기해요. 버튼을 누르고 말씀해 주세요.', '눌러서 말하기', '듣고 있어요…',
+    '이 주소로 가 주세요.', '이걸로 주문할게요.', '여기에 써 주세요'];
+  const PB_SRC = [].concat(PHRASES, REPLY_FULL, SOS_FULL, PARTNER_UI);
+  const IX = { phrase: 0, reply: PHRASES.length, sos: PHRASES.length + REPLY_FULL.length, ui: PHRASES.length + REPLY_FULL.length + SOS_FULL.length };
+  const UI_GREET = 0, UI_TAP = 1, UI_LISTEN = 2, UI_ADDR = 3, UI_ORDER = 4, UI_TYPE = 5;
+  const PB_VER = 1;
+
+  /* ---------- money (preview: fixed rates; the app refreshes them daily) ---------- */
+  const RATES_DATE = '10월 30일';
+  const ECB = { EUR: 1, USD: 1.1172, JPY: 175.68, KRW: 1491.76, CNY: 7.4326, HKD: 8.7652, SGD: 1.4282, MYR: 4.5325, IDR: 20275.17,
+    PHP: 71.143, THB: 37.683, GBP: 0.8338, AUD: 1.5904, NZD: 1.9823, CAD: 1.5606, CHF: 0.9194, TRY: 55.8015, INR: 106.084 };
+  const KRW_PER = {};
+  for (const [c, v] of Object.entries(ECB)) if (c !== 'KRW') KRW_PER[c] = ECB.KRW / v;
+  KRW_PER.VND = 0.051874;
+  KRW_PER.TWD = 40.9;
+  KRW_PER.AED = KRW_PER.USD / 3.6725;
+  const CURS = [['USD', '미국 달러'], ['JPY', '일본 엔'], ['EUR', '유로'], ['CNY', '중국 위안'], ['TWD', '대만 달러'], ['HKD', '홍콩 달러'],
+    ['VND', '베트남 동'], ['THB', '태국 바트'], ['PHP', '필리핀 페소'], ['SGD', '싱가포르 달러'], ['MYR', '말레이시아 링깃'], ['IDR', '인도네시아 루피아'],
+    ['GBP', '영국 파운드'], ['AUD', '호주 달러'], ['NZD', '뉴질랜드 달러'], ['CAD', '캐나다 달러'], ['CHF', '스위스 프랑'], ['TRY', '튀르키예 리라'],
+    ['INR', '인도 루피'], ['AED', '아랍에미리트 디르함']];
+  const CUR_BY_LANG = { en: 'USD', ja: 'JPY', zh: 'CNY', vi: 'VND', th: 'THB', id: 'IDR', ms: 'MYR', tl: 'PHP', es: 'EUR', fr: 'EUR', de: 'EUR',
+    it: 'EUR', pt: 'EUR', nl: 'EUR', tr: 'TRY', ar: 'AED', hi: 'INR' };
+  function money(v, cur) {
+    if (KRW_PER[cur]) {
+      try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: cur, minimumFractionDigits: (Number.isInteger(v) && v >= 100) ? 0 : undefined }).format(v); } catch (e) { /* fall through */ }
+    }
+    return String(Math.round(v * 100) / 100);
+  }
+  function krw(v, cur) {
+    const r = KRW_PER[cur];
+    if (!r || !(v > 0)) return '';
+    const w = v * r;
+    return '≈ ' + (w >= 1000 ? Math.round(w / 10) * 10 : Math.round(w)).toLocaleString('ko-KR') + '원';
+  }
+  const priceOf = (x) => {
+    if (typeof x === 'number' && isFinite(x) && x > 0) return x;
+    if (typeof x === 'string') { const n = parseFloat(x.replace(/[^0-9.]/g, '')); if (isFinite(n) && n > 0) return n; }
+    return null;
+  };
+
+  /* ---------- emergency numbers (checked against public lists; the app picks the country by itself) ---------- */
+  const SOS_COUNTRIES = [
+    ['JP', '일본', [['경찰', '110'], ['구급·소방', '119']]],
+    ['CN', '중국', [['경찰', '110'], ['구급', '120'], ['소방', '119']]],
+    ['TW', '대만', [['경찰', '110'], ['구급·소방', '119']]],
+    ['HK', '홍콩', [['경찰·구급·소방', '999']]],
+    ['MO', '마카오', [['경찰·구급·소방', '999']]],
+    ['VN', '베트남', [['경찰', '113'], ['구급', '115'], ['소방', '114']]],
+    ['TH', '태국', [['경찰', '191'], ['구급', '1669'], ['소방', '199']]],
+    ['PH', '필리핀', [['경찰·구급·소방', '911']]],
+    ['ID', '인도네시아', [['통합 긴급', '112'], ['경찰', '110'], ['구급', '118']]],
+    ['MY', '말레이시아', [['경찰·구급·소방', '999']]],
+    ['SG', '싱가포르', [['경찰', '999'], ['구급·소방', '995']]],
+    ['KH', '캄보디아', [['경찰', '117'], ['구급', '119'], ['소방', '118']]],
+    ['LA', '라오스', [['경찰', '191'], ['구급', '195'], ['소방', '190']]],
+    ['IN', '인도', [['통합 긴급', '112'], ['구급', '108']]],
+    ['AE', '아랍에미리트', [['경찰', '999'], ['구급', '998'], ['소방', '997']]],
+    ['TR', '튀르키예', [['통합 긴급', '112']]],
+    ['US', '미국', [['경찰·구급·소방', '911']]],
+    ['GU', '괌·사이판', [['경찰·구급·소방', '911']]],
+    ['CA', '캐나다', [['경찰·구급·소방', '911']]],
+    ['GB', '영국', [['경찰·구급·소방', '999'], ['통합 긴급', '112']]],
+    ['FR', '프랑스', [['통합 긴급', '112'], ['경찰', '17'], ['구급', '15'], ['소방', '18']]],
+    ['DE', '독일', [['경찰', '110'], ['구급·소방', '112']]],
+    ['IT', '이탈리아', [['통합 긴급', '112']]],
+    ['ES', '스페인', [['통합 긴급', '112']]],
+    ['PT', '포르투갈', [['통합 긴급', '112']]],
+    ['NL', '네덜란드', [['통합 긴급', '112']]],
+    ['CH', '스위스', [['경찰', '117'], ['구급', '144'], ['소방', '118']]],
+    ['RU', '러시아', [['통합 긴급', '112']]],
+    ['AU', '호주', [['경찰·구급·소방', '000']]],
+    ['NZ', '뉴질랜드', [['경찰·구급·소방', '111']]],
+  ].map(([code, ko, nums]) => ({ code, ko, nums }));
+  const SOS_BY = Object.fromEntries(SOS_COUNTRIES.map((c) => [c.code, c]));
+  const COUNTRY_BY_LANG = { en: 'US', ja: 'JP', zh: 'CN', vi: 'VN', th: 'TH', id: 'ID', ms: 'MY', tl: 'PH', es: 'ES', fr: 'FR', de: 'DE',
+    it: 'IT', pt: 'PT', ru: 'RU', tr: 'TR', ar: 'AE', hi: 'IN', nl: 'NL' };
+  const CONSUL = { label: '영사안전콜센터 · 24시간 한국어', show: '+82-2-3210-0404', dial: '+82232100404' };
+
+  /* ---------- storage + state ---------- */
+  const KEY = 'tongyeok.';
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(KEY + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(KEY + k, JSON.stringify(v)); } catch (e) { /* storage off: keep going */ } },
+  };
+  const okItem = (it) => it && typeof it === 'object' && it.status === 'done' && (
+    ((it.kind === 'speak' || it.kind === 'listen') && typeof it.orig === 'string' && typeof it.trans === 'string') ||
+    (it.kind === 'see' && Array.isArray(it.lines)));
+  const S = {
+    me: store.get('me', 'ko'),
+    them: store.get('them', 'en'),
+    autoSpeak: store.get('autoSpeak', true) !== false,
+    slow: store.get('slow', false) === true,
+    noteSeen: store.get('noteSeen', false) === true,
+    sosCountry: store.get('sosCountry', ''),
+    addr: null,
+    items: [],
+  };
+  if (!L[S.me]) S.me = 'ko';
+  if (!L[S.them] || S.them === S.me) S.them = S.me === 'en' ? 'ko' : 'en';
+  { const a = store.get('addr', null); if (a && typeof a === 'object' && str(a.address)) S.addr = { name: str(a.name), address: str(a.address), lang: str(a.lang), ko: str(a.ko), phone: str(a.phone) }; }
+  { const saved = store.get('items', []); if (Array.isArray(saved)) S.items = saved.filter(okItem).slice(-60); }
+  let seq = S.items.reduce((m, it) => Math.max(m, +it.id || 0), 0);
+  const blobs = new Map();
+  const fullURL = new Map();
+  const busy = new WeakSet();
+
+  function slim(it) {
+    const o = { id: it.id, ts: it.ts, kind: it.kind, src: it.src || '', dst: it.dst || '', status: 'done' };
+    if (it.kind === 'see') {
+      o.lines = it.lines; o.cur = it.cur || '';
+      if (it.img) o.img = it.img;
+      if (it.sample) o.sample = true;
+      if (it.order) o.order = it.order;
+    } else { o.orig = it.orig; o.trans = it.trans; }
+    return o;
+  }
+  let saveT = 0;
+  function save() {
+    clearTimeout(saveT);
+    saveT = setTimeout(() => {
+      const done = S.items.filter((it) => it.status === 'done').slice(-60).map(slim);
+      let imgs = 0;
+      for (let i = done.length - 1; i >= 0; i--) {
+        if (done[i].kind === 'see' && done[i].img) { if (imgs >= 8) delete done[i].img; else imgs++; }
+      }
+      store.set('items', done);
+    }, 300);
+  }
+
+  /* ---------- icons + dom helpers ---------- */
+  const ICONS = {
+    ear: '<path d="M7 9.2a5.6 5.6 0 0 1 11.2 0c0 2.5-1.4 3.6-2.5 4.6-1 .9-1.5 1.7-1.7 3-.3 1.9-1.6 3.2-3.5 3.2-1.6 0-2.8-.9-3.3-2.2"/><path d="M10.2 9.4a2.4 2.4 0 0 1 4.8 0c0 1.1-.6 1.7-1.3 2.2-.6.4-1 .9-1 1.7"/>',
+    head: '<path d="M4.5 20.5v-3C2.9 16.2 2 14.3 2 12.2 2 8 5.2 5 9.1 5c3.2 0 5.9 2 6.6 4.9l1.2 2.5c.2.4-.1.9-.5.9h-1.1v2.1c0 1.1-.9 2-2 2h-1.6v3"/><path d="M18.6 8.6c.8.9 1.2 2.1 1.2 3.4s-.4 2.5-1.2 3.4"/><path d="M20.9 6.6c1.3 1.5 2 3.4 2 5.4s-.7 3.9-2 5.4"/>',
+    eye: '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    speaker: '<path d="M4 9.5h3.2L11.5 6v12l-4.3-3.5H4z"/><path class="w1" d="M15 9.5a3.6 3.6 0 0 1 0 5"/><path class="w2" d="M17.6 7a7.2 7.2 0 0 1 0 10"/>',
+    expand: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>',
+    copy: '<rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>',
+    send: '<path d="M5 12h13M13 6l6 6-6 6"/>',
+    sliders: '<path d="M4 7h8M17 7h3M4 17h3M12 17h8"/><circle cx="14.5" cy="7" r="2.2"/><circle cx="9.5" cy="17" r="2.2"/>',
+    chev: '<path d="M6 9l6 6 6-6"/>',
+    swap: '<path d="M4 8.5h14.5M14.5 4.5l4 4-4 4M20 15.5H5.5M9.5 11.5l-4 4 4 4"/>',
+    camera: '<path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2.8l1.5-2.2h6.4L16.7 7h2.8A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.5"/>',
+    album: '<rect x="3" y="4" width="18" height="16" rx="1.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 15.5l-5-5L5.5 20"/>',
+    menu: '<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>',
+    receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    layers: '<path d="M12 4l9 4.5-9 4.5-9-4.5z"/><path d="M3 13l9 4.5 9-4.5"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+    face: '<rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M6 12h12M10 7l2-2 2 2M10 17l2 2 2-2"/>',
+    pin: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
+    edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    rotate: '<path d="M4.5 12a7.5 7.5 0 0 1 12.9-5.2M19 3.6v3.6h-3.6M19.5 12a7.5 7.5 0 0 1-12.9 5.2M5 20.4v-3.6h3.6"/>',
+    retry: '<path d="M19.6 14.5A8 8 0 1 1 17.7 6.3L20 8.6"/><path d="M20 3.8v4.8h-4.8"/>',
+    trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
+    alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/>',
+  };
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function ic(name, cls) {
+    const s = document.createElementNS(SVGNS, 'svg');
+    s.setAttribute('viewBox', '0 0 24 24');
+    s.setAttribute('class', 'i' + (cls ? ' ' + cls : ''));
+    s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = ICONS[name] || '';
+    return s;
+  }
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    if (props) for (const [k, v] of Object.entries(props)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : String(v));
+    }
+    for (const c of kids.flat()) {
+      if (c == null || c === false) continue;
+      el.append(c.nodeType ? c : document.createTextNode(String(c)));
+    }
+    return el;
+  }
+  const btn = (icon, label, fn, extra) => h('button', Object.assign({ class: 'act-b', type: 'button', onclick: fn }, extra || {}), ic(icon), h('span', null, label));
+  const dots = () => h('span', { class: 'dots', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'));
+  function langOn(el, code) {
+    const a = langAttr(code);
+    if (a) el.setAttribute('lang', a); else el.removeAttribute('lang');
+    el.setAttribute('dir', 'auto');
+    return el;
+  }
+
+  /* ---------- elements ---------- */
+  const feed = $('#feed'), feedList = $('#feedList'), feedNote = $('#feedNote');
+  const input = $('#txt'), sendBtn = $('#sendBtn'), form = $('#compose');
+  const modeChip = $('#modeChip'), modeLabel = $('#modeLabel');
+  const btnListen = $('#btnListen'), btnSpeak = $('#btnSpeak'), btnSee = $('#btnSee');
+  const toastEl = $('#toast');
+  const scrim = $('#scrim'), sheet = $('#sheet'), sheetTitle = $('#sheetTitle'), sheetBody = $('#sheetBody');
+  const big = $('#big'), bigBody = $('#bigBody'), bigFoot = $('#bigFoot');
+  const lens = $('#lens'), lensStage = $('#lensStage'), lensPic = $('#lensPic'), lensImg = $('#lensImg'), lensTags = $('#lensTags'), lensFoot = $('#lensFoot');
+  const face = $('#face');
+  const fileCam = $('#fileCam'), fileAlbum = $('#fileAlbum');
+
+  let toastT = 0;
+  function toast(msg, ms) {
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(() => { toastEl.hidden = true; }, ms || 2800);
+  }
+  toastEl.addEventListener('click', () => { toastEl.hidden = true; });
+
+  /* ---------- translation engine (preview: Claude) ---------- */
+  const ENG = { state: 'loading', img: false };
+  const samplePromise = (window.claude && typeof window.claude.use === 'function')
+    ? Promise.resolve().then(() => window.claude.use('sample')).catch(() => null)
+    : Promise.resolve(null);
+  samplePromise.then(async (s) => {
+    if (!s) { ENG.state = 'none'; renderNote(); return; }
+    let img = false;
+    try { const lim = await s.limits(); img = !!(lim && lim.images); } catch (e) { img = false; }
+    ENG.img = img;
+    if (ENG.state === 'loading') ENG.state = 'ok';
+    renderNote();
+  });
+  const HIDE = new Set(['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed']);
+  function errText(e) {
+    const c = e && e.code;
+    if (c === 'unavailable') return '이 화면에선 번역이 안 돼요. Claude 앱에서 열어 주세요.';
+    if (HIDE.has(c)) return '번역을 허용하지 않아서 번역할 수 없어요.';
+    if (c === 'rate_limited') return '사용량이 많아요. 잠시 뒤에 다시 해 주세요.';
+    if (c === 'session_expired') return '다시 로그인한 뒤에 해 주세요.';
+    if (c === 'refused') return '이 내용은 번역할 수 없어요.';
+    if (c === 'image_rejected') return '이 사진은 열 수 없어요. 다른 사진을 골라 주세요.';
+    if (c === 'images_unavailable') return '이 화면에선 사진 번역을 쓸 수 없어요.';
+    if (c === 'prompt_too_large') return '글이 너무 길어요. 나눠서 해 주세요.';
+    return '번역하지 못했어요. 다시 시도해 주세요.';
+  }
+  const engineOff = () => ENG.state === 'none' || ENG.state === 'denied';
+  async function askJSON(prompt, opts) {
+    const s = await samplePromise;
+    if (!s) throw { code: 'unavailable' };
+    if (ENG.state === 'denied') throw { code: 'not_granted' };
+    try {
+      return await s.json(prompt, Object.assign({ modelTier: 'quick' }, opts || {}));
+    } catch (e) {
+      if (e && HIDE.has(e.code)) { ENG.state = 'denied'; renderNote(); }
+      throw e;
+    }
+  }
+  const fence = (t) => '"""\n' + String(t).replace(/"""/g, '”””') + '\n"""';
+  function promptDirected(text, from, to) {
+    return 'Translate the text below from ' + L[from].en + ' into ' + L[to].en + '.\n' +
+      'It is something said out loud in a face-to-face conversation, often while traveling. Make it natural and polite, the way a native speaker would actually say it, and about as short as the original. Keep names, numbers and prices as they are. No notes, quotes or alternatives.\n' +
+      'Reply with only JSON like {"text":"<translation>"}.\n\nTEXT:\n' + fence(text);
+  }
+  function promptAuto(text) {
+    const me = L[S.me], th = L[S.them];
+    return 'You translate for a travel interpreter app. The user speaks ' + me.en + ' (code "' + me.code + '"); the person they are talking with speaks ' + th.en + ' (code "' + th.code + '").\n' +
+      'Detect the language of TEXT.\n- If TEXT is in ' + me.en + ', translate it into ' + th.en + '.\n- Otherwise translate it into ' + me.en + '.\n' +
+      'Make it natural and polite, as it would be said out loud. Keep names, numbers and prices as they are. No notes or alternatives.\n' +
+      'Reply with only JSON like {"src":"<ISO 639-1 code of TEXT>","dst":"<code of the translation>","text":"<translation>"}.\n\nTEXT:\n' + fence(text);
+  }
+  function promptPhoto() {
+    const me = L[S.me], th = L[S.them];
+    return 'The image is a photo a traveler took of a sign, menu, price list, notice or screen. Read the readable text in it and translate it.\n' +
+      '- If the text is in ' + me.en + ', translate it into ' + th.en + ' (code "' + th.code + '"); otherwise translate it into ' + me.en + ' (code "' + me.code + '").\n' +
+      '- One entry per line or item, in reading order. Skip logos, decoration and fragments you cannot read. At most 30 entries.\n' +
+      '- For an item that has a price: "o" is the item name without the price, "t" its translation, and "p" the price as a plain number. For other lines "p" is null.\n' +
+      '- "b" is the box around that text in the image: [left, top, right, bottom], each from 0 to 1000 as a share of the image width and height.\n' +
+      '- "cur" is the ISO 4217 code of the prices\' currency when the photo makes it clear (symbols such as $ ¥ € ₫ ฿, place names, the language), otherwise "".\n' +
+      'Reply with only JSON like {"src":"en","dst":"' + me.code + '","cur":"USD","lines":[{"o":"Iced Americano","t":"<translation>","p":4.5,"b":[90,270,520,310]}]}.\n' +
+      'If there is no readable text, reply {"src":"","dst":"","cur":"","lines":[]}.';
+  }
+  function promptAddr() {
+    return 'The image is a hotel booking screen, business card, map, sign or message. Find the place where the traveler is staying or wants to go.\n' +
+      'Reply with only JSON like {"name":"<place name as written>","address":"<full address as written; if the image shows it in the local language or script, use that>","lang":"<ISO 639-1 code of the address>","ko":"<the place name and address in Korean>","phone":"<phone number as written, or empty>"}.\n' +
+      'If there is no address, reply {"name":"","address":"","lang":"","ko":"","phone":""}.';
+  }
+  function promptPB(lang) {
+    return 'Translate each Korean string in this JSON array into ' + L[lang].en + '. They are short things a Korean traveler says to, or shows to, a local person; the last few are labels and requests shown on a translator screen. Keep them natural, polite and short, the way a native speaker would say them. Keep the same order and exactly ' + PB_SRC.length + ' items.\n' +
+      'Reply with only a JSON array of ' + PB_SRC.length + ' strings.\n\n' + JSON.stringify(PB_SRC);
+  }
+
+  /* phrasebook: one request per language, kept on the phone */
+  const pbMem = {}, pbWait = {};
+  function pbGet(lang) {
+    if (lang === 'ko') return PB_SRC;
+    if (pbMem[lang]) return pbMem[lang];
+    const s = store.get('pb.' + lang, null);
+    if (s && s.v === PB_VER && Array.isArray(s.list) && s.list.length === PB_SRC.length) { pbMem[lang] = s.list; return s.list; }
+    return null;
+  }
+  function ensurePB(lang) {
+    const have = pbGet(lang);
+    if (have) return Promise.resolve(have);
+    if (!L[lang]) return Promise.reject({ code: 'invalid_request' });
+    if (pbWait[lang]) return pbWait[lang];
+    const p = askJSON(promptPB(lang)).then((arr) => {
+      if (!Array.isArray(arr) || arr.length !== PB_SRC.length || arr.some((x) => typeof x !== 'string' || !x.trim())) throw { code: 'invalid_json' };
+      const list = arr.map((x) => x.trim());
+      pbMem[lang] = list;
+      store.set('pb.' + lang, { v: PB_VER, list });
+      return list;
+    });
+    pbWait[lang] = p;
+    p.then(() => { delete pbWait[lang]; }, () => { delete pbWait[lang]; });
+    return p;
+  }
+
+  /* ---------- menu drawing (examples) ---------- */
+  const EX_MENU = { title: 'CORNER CAFE', items: [['Iced Americano', '4.50'], ['Cafe Latte', '5.00'], ['Blueberry Muffin', '3.20']], extra: '', notes: ['Please order and pay at the counter.'] };
+  const FULL_MENU = { title: 'CORNER CAFE', items: [['Iced Americano', '4.50'], ['Cafe Latte', '5.00'], ['Matcha Latte', '5.50'], ['Blueberry Muffin', '3.20'], ['Ham & Cheese Toastie', '6.80']],
+    extra: '+ Oat milk  0.50', notes: ['Please order and pay at the counter.', 'Restrooms are for customers only.'] };
+  function drawMenu(spec, outW) {
+    const W = 1200, step = 80, y0 = 262;
+    let yEnd = y0 + (spec.items.length - 1) * step;
+    const yExtra = spec.extra ? yEnd + step : 0;
+    if (spec.extra) yEnd = yExtra;
+    const yNotes = yEnd + 112;
+    const H = yNotes + (spec.notes.length - 1) * 46 + 64;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    x.fillStyle = '#7A5232'; x.fillRect(0, 0, W, H);
+    const g = x.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#2B3F33'); g.addColorStop(1, '#1D2C24');
+    x.fillStyle = g; x.fillRect(36, 36, W - 72, H - 72);
+    x.fillStyle = 'rgba(255,255,255,0.05)';
+    for (let i = 0; i < 40; i++) { x.beginPath(); x.ellipse(70 + rnd() * (W - 140), 70 + rnd() * (H - 140), 50 + rnd() * 130, 8 + rnd() * 26, rnd() * Math.PI, 0, Math.PI * 2); x.fill(); }
+    const F = '"Barlow Semi Condensed","Arial Narrow",sans-serif';
+    const boxes = [];
+    const box = (x0, base, w, fs) => [x0 / W * 1000, (base - fs * 0.8) / H * 1000, (x0 + w) / W * 1000, (base + fs * 0.25) / H * 1000].map((n) => Math.round(Math.max(0, Math.min(1000, n))));
+    x.fillStyle = '#F3F0E4'; x.textBaseline = 'alphabetic';
+    x.font = '700 78px ' + F; x.textAlign = 'left';
+    const tw = x.measureText(spec.title).width;
+    x.fillText(spec.title, 600 - tw / 2, 148); boxes.push(box(600 - tw / 2, 148, tw, 78));
+    x.fillRect(430, 170, 340, 4);
+    x.font = '600 48px ' + F;
+    spec.items.forEach(([n, p], i) => {
+      const y = y0 + i * step;
+      x.textAlign = 'left'; x.fillText(n, 112, y); const nw = x.measureText(n).width;
+      x.textAlign = 'right'; x.fillText(p, W - 112, y); const pw = x.measureText(p).width;
+      x.globalAlpha = 0.45; for (let d = 112 + nw + 18; d < W - 112 - pw - 18; d += 20) x.fillRect(d, y - 12, 5, 5); x.globalAlpha = 1;
+      boxes.push(box(112, y, nw, 48));
+    });
+    x.textAlign = 'left'; x.font = '500 36px ' + F;
+    if (spec.extra) { x.fillText(spec.extra, 112, yExtra); boxes.push(box(112, yExtra, x.measureText(spec.extra).width, 36)); }
+    spec.notes.forEach((n, i) => { const w = x.measureText(n).width, y = yNotes + i * 46; x.fillText(n, 600 - w / 2, y); boxes.push(box(600 - w / 2, y, w, 36)); });
+    let url = '';
+    if (outW) {
+      const o = document.createElement('canvas'); o.width = outW; o.height = Math.round(H * outW / W);
+      o.getContext('2d').drawImage(c, 0, 0, o.width, o.height);
+      url = o.toDataURL('image/jpeg', 0.82);
+    }
+    return { canvas: c, boxes, url };
+  }
+  let EX = null;
+  function examples() {
+    if (EX) return EX;
+    let m = { boxes: [], url: '' };
+    try { m = drawMenu(EX_MENU, 900); } catch (e) { /* no canvas */ }
+    const b = (i) => m.boxes[i] || null;
+    EX = [
+      { exId: 1, kind: 'speak', src: 'ko', dst: 'en', orig: '화장실이 어디예요?', trans: 'Where is the restroom?', status: 'done' },
+      { exId: 2, kind: 'listen', src: 'en', dst: 'ko', orig: "Go straight down this hall. It's on your left, next to the elevator.", trans: '이 복도로 쭉 가세요. 왼쪽, 엘리베이터 옆에 있어요.', status: 'done' },
+      { exId: 3, kind: 'see', src: 'en', dst: 'ko', cur: 'USD', img: m.url, status: 'done', order: {}, orderPhrase: "I'd like to order these, please.",
+        lines: [
+          { o: 'Iced Americano', t: '아이스 아메리카노', p: 4.5, b: b(1) },
+          { o: 'Cafe Latte', t: '카페 라테', p: 5, b: b(2) },
+          { o: 'Blueberry Muffin', t: '블루베리 머핀', p: 3.2, b: b(3) },
+          { o: 'Please order and pay at the counter.', t: '주문과 계산은 카운터에서 해 주세요.', p: null, b: b(4) },
+        ] },
+    ];
+    return EX;
+  }
+  function redrawExample() {
+    if (!EX) return;
+    try {
+      const m = drawMenu(EX_MENU, 900);
+      EX[2].img = m.url;
+      EX[2].lines.forEach((l, i) => { l.b = m.boxes[i + 1] || l.b; });
+    } catch (e) { /* keep the first drawing */ }
+  }
+
+  /* ---------- feed ---------- */
+  const routeOf = (it) => (it.src && it.src !== '?' ? CODE(it.src) + ' → ' + CODE(it.dst) : '→ ' + CODE(it.dst));
+  const hasPrices = (it) => it.lines.some((l) => l.p > 0);
+  const hasBoxes = (it) => { const n = it.lines.filter((l) => Array.isArray(l.b)).length; return n > 0 && n >= it.lines.length / 2; };
+  const orderCount = (it) => Object.values(it.order || {}).reduce((s, q) => s + (q > 0 ? q : 0), 0);
+  const keyOf = (it) => (it.exId ? 'ex' + it.exId : String(it.id));
+  function lastListen() {
+    const real = S.items.length > 0;
+    if (!real) return EX && EX[1];
+    const last = S.items[S.items.length - 1];
+    return last && last.kind === 'listen' && last.status === 'done' ? last : null;
+  }
+
+  function cardNode(it, ex) {
+    if (it.kind === 'see') return seeNode(it, ex);
+    const c = h('article', { class: 'card ' + it.kind, 'data-id': ex ? null : it.id });
+    c.append(h('div', { class: 'card-h' },
+      h('span', { class: 'mode' }, it.kind === 'speak' ? '말하기' : '듣기'),
+      h('span', { class: 'route' }, routeOf(it)),
+      ex ? h('span', { class: 'ex' }, '예시') : null));
+    if (it.status === 'live') {
+      c.append(h('p', { class: 'orig' }, it.orig || '듣는 중…'), h('p', { class: 'trans' }, dots()));
+      return c;
+    }
+    c.append(langOn(h('p', { class: 'orig' }, it.orig), it.src));
+    if (it.status === 'pending') { c.append(h('p', { class: 'trans', 'aria-label': '번역 중' }, dots())); return c; }
+    if (it.status === 'error') {
+      c.append(h('p', { class: 'err' }, it.err || '번역하지 못했어요.'),
+        h('div', { class: 'acts' }, btn('retry', '다시 시도', () => runText(it)), btn('trash', '지우기', () => removeItem(it))));
+      return c;
+    }
+    c.append(langOn(h('p', { class: 'trans' + ([...it.trans].length > 90 ? ' long' : '') }, it.trans), it.dst));
+    const key = keyOf(it);
+    c.append(h('div', { class: 'acts' },
+      btn('speaker', '읽어주기', () => speak(it.trans, it.dst, key), { 'data-say': key }),
+      btn('expand', '크게 보기', () => openBig(it.trans, it.orig, it.dst, it.src)),
+      btn('copy', '복사', () => copyText(it.trans))));
+    if (it.kind === 'listen' && it === lastListen() && S.me === 'ko') {
+      c.append(h('p', { class: 'kick' }, '바로 대답'),
+        h('div', { class: 'replies' }, REPLY_LABELS.map((lab, i) => h('button', { class: 'rchip', type: 'button', onclick: () => reply(i) }, lab))));
+    }
+    return c;
+  }
+  function seeNode(it, ex) {
+    const c = h('article', { class: 'card see', 'data-id': ex ? null : it.id });
+    const route = it.src ? CODE(it.src) + ' → ' + CODE(it.dst || S.me) : '글자 → ' + CODE(S.me);
+    const priced = it.status === 'done' && hasPrices(it);
+    c.append(h('div', { class: 'card-h' }, ic('eye'), h('span', { class: 'mode' }, '보기'), h('span', { class: 'route' }, route),
+      priced ? h('button', { class: 'cur-chip', type: 'button', 'aria-label': '통화 바꾸기', onclick: () => curSheet(it) }, it.cur || '통화', ic('chev')) : null,
+      ex ? h('span', { class: 'ex' }, '예시') : it.sample ? h('span', { class: 'ex' }, '예시 사진') : null));
+    const overlay = it.status === 'done' && hasBoxes(it);
+    if (it.img) {
+      c.append(h('button', { class: 'see-pic', type: 'button', 'aria-label': overlay ? '사진 위에 번역 보기' : '사진 크게 보기', onclick: () => openLens(it) },
+        h('img', { class: 'see-img', src: it.img, alt: '' }),
+        overlay ? h('span', { class: 'over' }, ic('layers'), '사진 위에 보기') : null));
+    } else if (it.status === 'pending') c.append(h('div', { class: 'see-img ph' }));
+    if (it.status === 'pending') { c.append(h('p', { class: 'wait' }, dots(), h('span', null, '글자 읽는 중'))); return c; }
+    if (it.status === 'error') {
+      c.append(h('p', { class: 'err' }, it.err || '사진을 번역하지 못했어요.'),
+        h('div', { class: 'acts' }, blobs.has(it.id) ? btn('retry', '다시 시도', () => runPhoto(it)) : null, btn('trash', '지우기', () => removeItem(it))));
+      return c;
+    }
+    if (!it.lines.length) { c.append(h('p', { class: 'err' }, '사진에서 읽을 글자를 찾지 못했어요.')); return c; }
+    const ul = h('ul', { class: 'lines' });
+    const base = keyOf(it);
+    it.lines.forEach((ln, i) => {
+      const key = base + '-' + i;
+      const li = h('li', { class: 'line' }, langOn(h('span', { class: 'o' }, ln.o), it.src), langOn(h('span', { class: 't' }, ln.t), it.dst));
+      if (ln.p > 0) li.append(h('span', { class: 'pr' }, money(ln.p, it.cur), krw(ln.p, it.cur) ? h('b', null, krw(ln.p, it.cur)) : null));
+      li.append(h('button', { class: 'say', type: 'button', 'aria-label': '원문 읽어주기', 'data-say': key, onclick: () => speak(ln.o, it.src, key) }, ic('speaker')));
+      ul.append(li);
+    });
+    c.append(ul);
+    const n = orderCount(it);
+    c.append(h('div', { class: 'acts' },
+      priced ? h('button', { class: 'act-b', type: 'button', onclick: () => orderSheet(it) }, ic('receipt'), h('span', null, '주문하기'), n ? h('em', null, String(n)) : null) : null,
+      overlay ? btn('layers', '사진 위에', () => openLens(it)) : null,
+      btn('copy', '복사', () => copyText(it.lines.map((l) => l.o + '\n' + l.t).join('\n\n')))));
+    return c;
+  }
+
+  function renderFeed() {
+    const real = S.items.length > 0;
+    const frag = document.createDocumentFragment();
+    for (const it of (real ? S.items : examples())) frag.append(cardNode(it, !real));
+    feedList.replaceChildren(frag);
+  }
+  function scrollEnd() { requestAnimationFrame(() => { feed.scrollTop = feed.scrollHeight; }); }
+  const findNode = (it) => feedList.querySelector('[data-id="' + it.id + '"]');
+  function addItem(it) {
+    it.id = ++seq; it.ts = Date.now();
+    S.items.push(it);
+    if (S.items.length > 80) S.items.splice(0, S.items.length - 80);
+    renderFeed(); scrollEnd(); save();
+    return it;
+  }
+  function updateItem(it) {
+    if (it.exId) { renderFeed(); return; }
+    const n = findNode(it);
+    if (n && it.kind !== 'listen') n.replaceWith(cardNode(it, false)); else renderFeed();
+    save();
+  }
+  function removeItem(it) {
+    const i = S.items.indexOf(it);
+    if (i >= 0) S.items.splice(i, 1);
+    blobs.delete(it.id);
+    if (fullURL.has(it.id)) { try { URL.revokeObjectURL(fullURL.get(it.id)); } catch (e) { /* ignore */ } fullURL.delete(it.id); }
+    renderFeed();
+    save();
+  }
+
+  function noteBox(icon, text, onOk) {
+    return h('div', { class: 'note', role: 'note' }, ic(icon), h('p', null, text),
+      onOk ? h('button', { type: 'button', onclick: onOk }, '알겠어요') : null);
+  }
+  function renderNote() {
+    let node = null;
+    if (ENG.state === 'none') node = noteBox('alert', '이 화면에선 번역이 안 돼요. Claude 앱이나 claude.ai에서 열어 주세요.');
+    else if (ENG.state === 'denied') node = noteBox('alert', '번역을 허용하지 않아서 지금은 번역이 안 돼요. 이 화면을 다시 열면 다시 물어봐요.');
+    else if (micBlocked && !S.noteSeen) node = noteBox('mic', '미리보기에선 마이크를 쓸 수 없어서 듣기·말하기를 누르면 글로 받아요. 키보드의 마이크 버튼으로 말해도 돼요. 앱(APK)에선 바로 들어요.',
+      () => { S.noteSeen = true; store.set('noteSeen', true); renderNote(); });
+    feedNote.replaceChildren(...(node ? [node] : []));
+    $('#engineTxt').textContent = engineOff() ? '미리보기 · 번역 꺼짐' : '미리보기 · Claude 번역';
+  }
+
+  /* ---------- text translation ---------- */
+  function finish(it, trans, opts) {
+    it.trans = trans; it.status = 'done'; delete it.auto;
+    updateItem(it);
+    if (it === S.items[S.items.length - 1]) scrollEnd();
+    if (it.kind === 'speak' && S.autoSpeak && !(opts && opts.silent)) speak(it.trans, it.dst, String(it.id));
+  }
+  async function runText(it, opts) {
+    if (busy.has(it)) return;
+    busy.add(it);
+    it.status = 'pending'; it.err = null;
+    updateItem(it);
+    try {
+      if (it.auto) {
+        const r = await askJSON(promptAuto(it.orig));
+        if (!r || typeof r.text !== 'string' || !r.text.trim()) throw { code: 'invalid_json' };
+        const src = normCode(r.src);
+        const mine = src === S.me;
+        it.kind = mine ? 'speak' : 'listen';
+        it.src = mine ? S.me : (src || '');
+        it.dst = mine ? S.them : S.me;
+        finish(it, r.text.trim(), opts);
+      } else {
+        const r = await askJSON(promptDirected(it.orig, it.src, it.dst));
+        if (!r || typeof r.text !== 'string' || !r.text.trim()) throw { code: 'invalid_json' };
+        finish(it, r.text.trim(), opts);
+      }
+    } catch (e) {
+      it.status = 'error'; it.err = errText(e);
+      updateItem(it);
+    } finally {
+      busy.delete(it);
+    }
+  }
+  async function phrase(i) {
+    const it = addItem({ kind: 'speak', src: S.me, dst: S.them, orig: PHRASES[i], trans: '', status: 'pending' });
+    try { const pb = await ensurePB(S.them); finish(it, pb[IX.phrase + i]); }
+    catch (e) { it.status = 'error'; it.err = errText(e); updateItem(it); }
+  }
+  async function reply(i, opts) {
+    const it = addItem({ kind: 'speak', src: S.me, dst: S.them, orig: REPLY_FULL[i], trans: '', status: 'pending' });
+    try { const pb = await ensurePB(S.them); finish(it, pb[IX.reply + i], opts); }
+    catch (e) { it.status = 'error'; it.err = errText(e); updateItem(it); }
+    return it;
+  }
+
+  /* ---------- compose (typing, and the preview's stand-in for the microphone) ---------- */
+  let mode = null;
+  function route(k) {
+    if (k === 'listen') return CODE(S.them) + ' → ' + CODE(S.me);
+    if (k === 'speak') return CODE(S.me) + ' → ' + CODE(S.them);
+    return '글자 → ' + CODE(S.me);
+  }
+  function setMode(kind) {
+    mode = kind || null;
+    modeChip.hidden = !mode;
+    if (mode) { modeChip.className = 'mode-chip ' + mode; modeLabel.textContent = (mode === 'speak' ? '말하기 ' : '듣기 ') + route(mode); }
+    input.placeholder = mode === 'speak' ? nameKo(S.me) + '로 쓰면 ' + nameKo(S.them) + '로 읽어줘요'
+      : mode === 'listen' ? '상대가 한 말(' + nameKo(S.them) + ')을 적어 주세요'
+      : '글로 써도 돼요 · 언어는 알아서 맞춰요';
+  }
+  function onSubmit(e) {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    sendBtn.disabled = true;
+    let it;
+    if (mode === 'speak') it = addItem({ kind: 'speak', src: S.me, dst: S.them, orig: text, trans: '', status: 'pending' });
+    else if (mode === 'listen') it = addItem({ kind: 'listen', src: S.them, dst: S.me, orig: text, trans: '', status: 'pending' });
+    else {
+      const looksMine = S.me === 'ko' && /[가-힣]/.test(text);
+      it = addItem({ kind: looksMine ? 'speak' : 'listen', src: looksMine ? S.me : '', dst: looksMine ? S.them : S.me, orig: text, trans: '', status: 'pending', auto: true });
+    }
+    setMode(null);
+    runText(it);
+  }
+
+  /* ---------- listening ---------- */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  let micBlocked = !SR;
+  try {
+    const pp = document.permissionsPolicy || document.featurePolicy;
+    if (pp && typeof pp.allowsFeature === 'function' && !pp.allowsFeature('microphone')) micBlocked = true;
+  } catch (e) { /* no policy api */ }
+  let rec = null, recKind = null, toldMic = false;
+
+  function setRec(r, kind) {
+    rec = r; recKind = r ? kind : null;
+    for (const [b, k] of [[btnListen, 'listen'], [btnSpeak, 'speak']]) {
+      const on = !!r && kind === k;
+      b.classList.toggle('rec', on);
+      b.querySelector('b').textContent = on ? '듣는 중' : (k === 'listen' ? '듣기' : '말하기');
+      b.querySelector('small').textContent = on ? '누르면 끝' : route(k);
+    }
+  }
+  function stopRec() { if (rec) { try { rec.stop(); } catch (e) { /* already stopped */ } } }
+  function failToast(code, lang) {
+    if (code === 'no-speech') toast('말소리가 들리지 않았어요. 다시 눌러서 말해 주세요.');
+    else if (code === 'network') toast('인터넷 연결을 확인해 주세요.');
+    else if (code === 'language-not-supported') toast(nameKo(lang) + '는 이 기기에서 알아듣지 못해요.');
+  }
+  // One utterance. Calls back onPartial(text), then onDone(text) or onFail(code). Returns the recognizer or null.
+  function listen(lang, cb) {
+    if (micBlocked) { cb.onFail('blocked'); return null; }
+    let r;
+    try { r = new SR(); } catch (e) { micBlocked = true; renderNote(); cb.onFail('blocked'); return null; }
+    let finalText = '', interim = '', err = null, blocked = false;
+    r.lang = L[lang].bcp; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+    r.onresult = (ev) => {
+      interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const res = ev.results[i];
+        if (res.isFinal) finalText += res[0].transcript; else interim += res[0].transcript;
+      }
+      if (cb.onPartial) cb.onPartial((finalText + interim).trim());
+    };
+    r.onerror = (ev) => {
+      err = ev.error;
+      if (err === 'not-allowed' || err === 'service-not-allowed' || err === 'audio-capture') { blocked = true; micBlocked = true; }
+    };
+    r.onend = () => {
+      if (rec === r) setRec(null);
+      const text = (finalText || interim).trim();
+      if (blocked) { renderNote(); cb.onFail('blocked'); return; }
+      if (text) cb.onDone(text); else cb.onFail(err || 'no-speech');
+    };
+    try { r.start(); } catch (e) { micBlocked = true; renderNote(); cb.onFail('blocked'); return null; }
+    return r;
+  }
+  function fallback(kind) {
+    setMode(kind);
+    try { input.focus(); } catch (e) { /* ignore */ }
+    if (!toldMic) { toldMic = true; toast('미리보기에선 마이크 대신 글로 받아요. 키보드의 마이크 버튼으로 말해도 돼요.', 4200); }
+  }
+  function voice(kind) {
+    if (rec) { stopRec(); return; }
+    if (micBlocked) { fallback(kind); return; }
+    const src = kind === 'speak' ? S.me : S.them, dst = kind === 'speak' ? S.them : S.me;
+    const it = addItem({ kind, src, dst, orig: '', trans: '', status: 'live' });
+    const r = listen(src, {
+      onPartial: (t) => { it.orig = t; const n = findNode(it); const o = n && n.querySelector('.orig'); if (o) o.textContent = t || '듣는 중…'; },
+      onDone: (t) => { it.orig = t; runText(it); },
+      onFail: (code) => { removeItem(it); if (code === 'blocked') fallback(kind); else failToast(code, src); },
+    });
+    if (r) setRec(r, kind);
+  }
+
+  /* ---------- speaking ---------- */
+  let voices = [];
+  const loadVoices = () => { try { voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; } catch (e) { voices = []; } };
+  if (window.speechSynthesis) { loadVoices(); try { window.speechSynthesis.addEventListener('voiceschanged', loadVoices); } catch (e) { /* old api */ } }
+  function pickVoice(bcp) {
+    if (!voices.length) loadVoices();
+    const want = bcp.toLowerCase(), base = want.split('-')[0];
+    const norm = (v) => String(v.lang || '').toLowerCase().replace('_', '-');
+    return voices.find((v) => norm(v) === want) || voices.find((v) => norm(v).split('-')[0] === base) || null;
+  }
+  function markSpeaking(key, on) {
+    document.querySelectorAll('.speaking').forEach((b) => b.classList.remove('speaking'));
+    if (on && key) document.querySelectorAll('[data-say="' + key + '"]').forEach((b) => b.classList.add('speaking'));
+  }
+  let speakT = 0, toldVoice = false;
+  function speak(text, code, key, onDone) {
+    let doneOnce = false;
+    const done = () => { if (!doneOnce) { doneOnce = true; if (onDone) onDone(); } };
+    if (!text) { done(); return; }
+    const synth = window.speechSynthesis;
+    if (!synth || typeof window.SpeechSynthesisUtterance !== 'function') {
+      if (!toldVoice) { toldVoice = true; toast('이 화면에선 소리를 낼 수 없어요. 앱(APK)에선 폰 음성으로 읽어줘요.', 3600); }
+      done(); return;
+    }
+    try { synth.cancel(); } catch (e) { /* nothing queued */ }
+    const l = L[code];
+    const bcp = l ? l.bcp : (code || 'en');
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = bcp;
+    u.rate = S.slow ? 0.7 : 0.95;
+    const v = pickVoice(bcp);
+    if (v) u.voice = v;
+    let started = false;
+    u.onstart = () => { started = true; markSpeaking(key, true); };
+    u.onend = () => { markSpeaking(key, false); done(); };
+    u.onerror = () => { markSpeaking(key, false); done(); };
+    synth.speak(u);
+    clearTimeout(speakT);
+    speakT = setTimeout(() => {
+      if (!started && !synth.speaking) {
+        if (!toldVoice) { toldVoice = true; toast('소리가 안 나면 이 기기에 ' + (l ? l.ko : '이 언어') + ' 읽기 음성이 없을 수 있어요. 앱(APK)에선 폰 음성으로 읽어줘요.', 4200); }
+        done();
+      }
+    }, 2500);
+  }
+
+  /* ---------- seeing (photos) ---------- */
+  async function prepImage(file) {
+    let src;
+    try { src = await createImageBitmap(file); }
+    catch (e) {
+      src = await new Promise((res, rej) => {
+        const im = new Image(); const u = URL.createObjectURL(file);
+        im.onload = () => { URL.revokeObjectURL(u); res(im); };
+        im.onerror = () => { URL.revokeObjectURL(u); rej(e); };
+        im.src = u;
+      });
+    }
+    const w = src.width || src.naturalWidth, hh = src.height || src.naturalHeight;
+    if (!w || !hh) throw new Error('empty image');
+    const draw = (max) => {
+      const k = Math.min(1, max / Math.max(w, hh));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(hh * k));
+      const x = c.getContext('2d');
+      x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(src, 0, 0, c.width, c.height);
+      return c;
+    };
+    const bigC = draw(1568);
+    const blob = await new Promise((res, rej) => bigC.toBlob((b) => (b ? res(b) : rej(new Error('encode'))), 'image/jpeg', 0.86));
+    const thumb = draw(560).toDataURL('image/jpeg', 0.72);
+    if (src.close) src.close();
+    return { blob, thumb };
+  }
+  function validBox(b) {
+    if (!Array.isArray(b) || b.length !== 4 || !b.every((n) => typeof n === 'number' && isFinite(n))) return null;
+    if (b.some((n) => n < -5 || n > 1005)) return null;
+    const v = b.map((n) => Math.round(Math.max(0, Math.min(1000, n))));
+    return v[2] > v[0] && v[3] > v[1] ? v : null;
+  }
+  async function photo(file, opts) {
+    opts = opts || {};
+    const it = addItem({ kind: 'see', src: '', dst: '', cur: '', lines: [], status: 'pending', img: null, sample: !!opts.sample, order: {} });
+    try {
+      const p = await prepImage(file);
+      it.img = p.thumb; blobs.set(it.id, p.blob);
+      try { fullURL.set(it.id, URL.createObjectURL(p.blob)); } catch (e) { /* thumb only */ }
+      updateItem(it); scrollEnd();
+    } catch (e) {
+      it.status = 'error'; it.err = '사진을 열지 못했어요. 다른 사진을 골라 주세요.';
+      updateItem(it); return;
+    }
+    await runPhoto(it);
+    if (it.status !== 'done') return;
+    if (opts.mode === 'lens' && hasBoxes(it)) openLens(it);
+    else if (opts.mode === 'order') { if (hasPrices(it)) orderSheet(it); else toast('가격이 있는 메뉴를 찾지 못했어요.'); }
+  }
+  async function runPhoto(it) {
+    const blob = blobs.get(it.id);
+    if (!blob || busy.has(it)) return;
+    busy.add(it);
+    it.status = 'pending'; it.err = null;
+    updateItem(it);
+    try {
+      const r = await askJSON(promptPhoto(), { images: [blob] });
+      if (!r || !Array.isArray(r.lines)) throw { code: 'invalid_json' };
+      it.lines = r.lines
+        .filter((x) => x && typeof x.o === 'string' && typeof x.t === 'string' && (x.o.trim() || x.t.trim()))
+        .slice(0, 30).map((x) => ({ o: x.o.trim(), t: x.t.trim(), p: priceOf(x.p), b: validBox(x.b) }));
+      it.src = normCode(r.src);
+      it.dst = normCode(r.dst) || (it.src === S.me ? S.them : S.me);
+      const cur = String(r.cur || '').trim().toUpperCase();
+      it.cur = KRW_PER[cur] ? cur : (CUR_BY_LANG[it.src] || '');
+      it.status = 'done';
+      updateItem(it);
+      if (it === S.items[S.items.length - 1]) scrollEnd();
+    } catch (e) {
+      it.status = 'error'; it.err = errText(e);
+      updateItem(it);
+    } finally {
+      busy.delete(it);
+    }
+  }
+  async function samplePhoto(mode) {
+    try { if (document.fonts) await Promise.race([document.fonts.load('600 48px "Barlow Semi Condensed"'), new Promise((r) => setTimeout(r, 1500))]); } catch (e) { /* fallback font */ }
+    let c;
+    try { c = drawMenu(FULL_MENU).canvas; } catch (e) { toast('예시 사진을 만들지 못했어요.'); return; }
+    c.toBlob((b) => { if (b) photo(b, { sample: true, mode }); else toast('예시 사진을 만들지 못했어요.'); }, 'image/jpeg', 0.9);
+  }
+  let pickFor = null;
+  function pickPhoto(purpose, camera) {
+    pickFor = purpose;
+    (camera ? fileCam : fileAlbum).click();
+  }
+  function onFile(e) {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    const p = pickFor || { kind: 'see', mode: 'list' };
+    pickFor = null;
+    if (!f) return;
+    if (p.kind === 'addr') readAddress(f); else photo(f, p);
+  }
+  function photoReady() {
+    if (engineOff()) { toast(errText({ code: ENG.state === 'none' ? 'unavailable' : 'not_granted' })); return false; }
+    if (ENG.state === 'ok' && !ENG.img) { toast('이 화면에선 사진 번역을 쓸 수 없어요.'); return false; }
+    return true;
+  }
+
+  /* lens: translations laid over the photo (the app does this live over the camera) */
+  let lensItem = null;
+  function openLens(it) {
+    lensItem = it;
+    lensTags.replaceChildren();
+    const overlay = it.status === 'done' && hasBoxes(it);
+    if (overlay) {
+      for (const l of it.lines) {
+        if (!l.b) continue;
+        const [x0, y0, x1, y1] = l.b;
+        const tag = h('button', { class: 'lens-tag', type: 'button', 'data-h': y1 - y0, 'aria-label': l.t + ' (원문 읽어주기)', onclick: () => speak(l.o, it.src, null) },
+          langOn(h('span', null, l.t), it.dst), l.p > 0 && krw(l.p, it.cur) ? h('small', null, ' ' + krw(l.p, it.cur)) : null);
+        tag.style.left = (x0 / 10) + '%';
+        tag.style.top = (y0 / 10) + '%';
+        tag.style.minWidth = Math.max(6, (x1 - x0) / 10) + '%';
+        tag.style.maxWidth = Math.max(20, 100 - x0 / 10) + '%';
+        lensTags.append(tag);
+      }
+    }
+    $('#lensTitle').textContent = overlay ? '사진 위 번역' : '사진';
+    $('#lensNote').textContent = overlay ? '글자를 누르면 원문을 읽어줘요. 미리보기는 사진 한 장으로 보여주고, 앱에선 카메라를 비추는 동안 바로 겹쳐요.' : '';
+    lensFoot.replaceChildren(
+      h('button', { class: 'lens-b', type: 'button', onclick: closeLens }, ic('list'), h('span', null, '목록 보기')),
+      it.status === 'done' && hasPrices(it) ? h('button', { class: 'lens-b main', type: 'button', onclick: () => orderSheet(it) }, ic('receipt'), h('span', null, '주문하기')) : null);
+    lensImg.onload = fitLens;
+    lensImg.src = fullURL.get(it.id) || it.img || '';
+    lens.hidden = false;
+    requestAnimationFrame(fitLens);
+  }
+  function fitLens() {
+    const iw = lensImg.naturalWidth, ih = lensImg.naturalHeight;
+    if (!iw || lens.hidden) return;
+    const st = lensStage.getBoundingClientRect();
+    const k = Math.min(st.width / iw, st.height / ih);
+    const w = Math.max(1, Math.floor(iw * k)), hh = Math.max(1, Math.floor(ih * k));
+    lensPic.style.width = w + 'px'; lensPic.style.height = hh + 'px';
+    lensTags.querySelectorAll('.lens-tag').forEach((t) => {
+      const bh = (+t.dataset.h / 1000) * hh;
+      t.style.fontSize = Math.max(12, Math.min(22, bh * 0.72)) + 'px';
+    });
+  }
+  function closeLens() { lens.hidden = true; lensItem = null; markSpeaking(null, false); }
+  window.addEventListener('resize', () => { if (!lens.hidden) fitLens(); });
+
+  /* menu ordering */
+  function orderSheet(it) {
+    const rows = it.lines.map((l, i) => ({ l, i })).filter((x) => x.l.p > 0);
+    if (!rows.length) { toast('가격이 있는 메뉴를 찾지 못했어요.'); return; }
+    it.order = it.order || {};
+    const totalEl = h('p', { class: 'o-total' });
+    const showBtn = h('button', { class: 'o-show', type: 'button' }, '주문 보여주기');
+    const clearBtn = h('button', { class: 'o-clear', type: 'button' }, '비우기');
+    const list = h('div', null);
+    const qtyEls = {};
+    const refresh = () => {
+      let count = 0, total = 0;
+      for (const { l, i } of rows) {
+        const q = it.order[i] || 0;
+        count += q; total += q * l.p;
+        qtyEls[i].q.textContent = String(q);
+        qtyEls[i].row.classList.toggle('on', q > 0);
+      }
+      totalEl.replaceChildren(count ? '합계 ' + money(total, it.cur) + ' ' : '먹을 것을 눌러 담아 주세요', count && krw(total, it.cur) ? h('small', null, krw(total, it.cur)) : null);
+      showBtn.disabled = !count;
+      updateItem(it);
+    };
+    const change = (i, d) => { it.order[i] = Math.max(0, Math.min(99, (it.order[i] || 0) + d)); refresh(); };
+    for (const { l, i } of rows) {
+      const q = h('span', { class: 'q', 'aria-live': 'polite' }, '0');
+      const row = h('div', { class: 'o-row' },
+        h('button', { class: 'o-main', type: 'button', onclick: () => change(i, 1) }, langOn(h('b', null, l.t), it.dst),
+          h('small', null, l.o + ' · ' + money(l.p, it.cur) + (krw(l.p, it.cur) ? ' ' + krw(l.p, it.cur) : ''))),
+        h('div', { class: 'step' },
+          h('button', { type: 'button', 'aria-label': l.t + ' 하나 빼기', onclick: () => change(i, -1) }, '−'), q,
+          h('button', { type: 'button', 'aria-label': l.t + ' 하나 더', onclick: () => change(i, 1) }, '+')));
+      qtyEls[i] = { q, row };
+      list.append(row);
+    }
+    clearBtn.addEventListener('click', () => { it.order = {}; refresh(); });
+    showBtn.addEventListener('click', () => { closeSheet(); showOrder(it); });
+    openSheet('주문하기', h('div', null, h('p', { class: 'sheet-note' }, '먹을 것을 누를 때마다 하나씩 담겨요.'), list,
+      h('div', { class: 'o-foot' }, totalEl, h('div', { class: 'o-btns' }, clearBtn, showBtn))));
+    refresh();
+  }
+  async function showOrder(it) {
+    const picked = it.lines.map((l, i) => ({ l, q: (it.order && it.order[i]) || 0 })).filter((x) => x.q > 0 && x.l.p > 0);
+    if (!picked.length) return;
+    const lang = L[it.src] ? it.src : S.them;
+    const lead = langOn(h('p', { class: 'big-lead' }, it.orderPhrase || pbLine(lang, IX.ui + UI_ORDER) || '…'), lang);
+    const list = h('ul', { class: 'big-list' }, picked.map((x) => h('li', null, langOn(h('span', null, x.l.o), lang), h('span', null, '× ' + x.q))));
+    const total = picked.reduce((s, x) => s + x.l.p * x.q, 0);
+    const sub = h('p', { class: 'big-orig' }, picked.map((x) => x.l.t + ' ' + x.q).join(', ') + ' · 합계 ' + money(total, it.cur) + (krw(total, it.cur) ? ' (' + krw(total, it.cur) + ')' : ''));
+    const sayText = () => [lead.textContent].concat(picked.map((x) => x.l.o + ', ' + x.q)).join('. ');
+    openBoard({ tone: 'sign', label: '주문', body: [h('p', { class: 'big-kicker' }, '점원에게 보여 주세요'), lead, list, sub],
+      foot: [footBtn('speaker', '읽어주기', () => speak(sayText(), lang, 'order'), 'order')] });
+    if (!it.orderPhrase && !pbLine(lang, IX.ui + UI_ORDER)) {
+      try { const pb = await ensurePB(lang); lead.textContent = pb[IX.ui + UI_ORDER]; } catch (e) { lead.textContent = ''; }
+    }
+  }
+  const pbLine = (lang, i) => { const pb = pbGet(lang); return pb ? pb[i] : ''; };
+  function curSheet(it) {
+    const list = h('div', { role: 'radiogroup', 'aria-label': '통화' });
+    for (const [c, nm] of CURS) {
+      const on = c === it.cur;
+      const r = KRW_PER[c];
+      const unit = r < 1 ? 10000 : r < 20 ? 100 : 1;
+      list.append(h('button', { class: 'opt', type: 'button', role: 'radio', 'aria-checked': String(on), onclick: () => {
+        it.cur = c; closeSheet(); updateItem(it); if (!lens.hidden && lensItem === it) openLens(it);
+      } }, h('span', { class: 'tag' }, c), h('span', { class: 'k' }, nm),
+        h('span', { class: 'n' }, unit.toLocaleString('en-US') + ' ' + c + ' ≈ ' + Math.round(unit * r).toLocaleString('ko-KR') + '원'), on ? ic('check', 'ck') : null));
+    }
+    openSheet('통화 · 환율 ' + RATES_DATE + ' 기준', h('div', null,
+      h('p', { class: 'sheet-note' }, '미리보기는 고정 환율이에요. 앱에선 지금 있는 나라 통화로 알아서 맞추고, 환율을 하루 한 번 새로 받아 와요.'), list));
+  }
+
+  /* ---------- boards shown to the other person ---------- */
+  const footBtn = (icon, label, fn, sayKey, alt) => h('button', { class: 'big-say' + (alt ? ' alt' : ''), type: 'button', onclick: fn, 'data-say': sayKey || null }, ic(icon), h('span', null, label));
+  function sizeFor(text) {
+    const n = [...String(text)].length;
+    return n <= 12 ? 'min(64px, 15vw)' : n <= 28 ? 'min(52px, 12vw)' : n <= 60 ? 'min(40px, 9.5vw)' : n <= 120 ? '30px' : '24px';
+  }
+  function openBoard(o) {
+    big.className = 'big ' + (o.tone || 'sign');
+    big.setAttribute('aria-label', o.label || '크게 보기');
+    bigBody.classList.remove('flip');
+    bigBody.replaceChildren(...o.body.filter(Boolean));
+    bigFoot.replaceChildren(...(o.foot || []).filter(Boolean));
+    bigBody.scrollTop = 0;
+    big.hidden = false;
+    try { $('#bigClose').focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+  }
+  function closeBoard() {
+    big.hidden = true;
+    markSpeaking(null, false);
+    try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+  }
+  function openBig(main, sub, code, subCode) {
+    const t = langOn(h('p', { class: 'big-trans' }, main), code);
+    t.style.fontSize = sizeFor(main);
+    openBoard({ tone: 'sign', label: '크게 보기', body: [t, langOn(h('p', { class: 'big-orig' }, sub || ''), subCode)],
+      foot: [footBtn('speaker', '읽어주기', () => speak(main, code, 'big'), 'big')] });
+  }
+
+  /* address card */
+  async function showAddress() {
+    const a = S.addr;
+    if (!a) { addrSheet(); return; }
+    const lang = L[a.lang] ? a.lang : S.them;
+    const lead = langOn(h('p', { class: 'big-lead' }, pbLine(lang, IX.ui + UI_ADDR) || '…'), lang);
+    const name = a.name ? langOn(h('p', { class: 'big-trans' }, a.name), lang) : null;
+    if (name) name.style.fontSize = sizeFor(a.name);
+    const addr = langOn(h('p', { class: 'big-addr' }, a.address), lang);
+    const sub = [a.ko, a.phone ? '전화 ' + a.phone : ''].filter(Boolean).join(' · ');
+    openBoard({ tone: 'sign', label: '주소 카드', body: [h('p', { class: 'big-kicker' }, '택시 기사님께 보여 주세요'), lead, name, addr, sub ? h('p', { class: 'big-orig' }, sub) : null],
+      foot: [footBtn('speaker', '읽어주기', () => speak([lead.textContent, a.name, a.address].filter(Boolean).join('. '), lang, 'addr'), 'addr'),
+        footBtn('edit', '바꾸기', () => { closeBoard(); addrSheet(); }, null, true)] });
+    if (!pbLine(lang, IX.ui + UI_ADDR)) {
+      try { const pb = await ensurePB(lang); lead.textContent = pb[IX.ui + UI_ADDR]; }
+      catch (e) { lead.textContent = PARTNER_UI[UI_ADDR]; langOn(lead, 'ko'); }
+    }
+  }
+  function addrSheet() {
+    openSheet('숙소 주소 카드', h('div', null,
+      h('p', { class: 'sheet-note' }, '숙소 주소를 한 번 넣어 두면, 택시 탈 때 주소 버튼 한 번으로 크게 보여줘요.'),
+      h('button', { class: 'opt', type: 'button', onclick: () => { closeSheet(); if (photoReady()) pickPhoto({ kind: 'addr' }, true); } }, ic('camera'), h('span', { class: 'kn' }, h('b', null, '예약 화면·명함 찍기'), h('small', null, '주소가 보이게 찍으면 알아서 읽어요'))),
+      h('button', { class: 'opt', type: 'button', onclick: () => { closeSheet(); if (photoReady()) pickPhoto({ kind: 'addr' }, false); } }, ic('album'), h('span', { class: 'kn' }, h('b', null, '앨범에서 가져오기'), h('small', null, '예약 앱 화면 캡처도 돼요'))),
+      h('button', { class: 'opt', type: 'button', onclick: addrForm }, ic('edit'), h('span', { class: 'kn' }, h('b', null, '직접 쓰기'), h('small', null, '주소를 붙여 넣거나 써요'))),
+      S.addr ? h('button', { class: 'danger', type: 'button', onclick: () => { S.addr = null; store.set('addr', null); closeSheet(); toast('주소 카드를 지웠어요.'); } }, '주소 카드 지우기') : null));
+  }
+  function addrForm() {
+    const name = h('input', { id: 'aName', type: 'text', placeholder: '예: 선라이즈 호텔', autocomplete: 'off' });
+    const addr = h('textarea', { id: 'aAddr', placeholder: '예: 1-2-3 Shinjuku, Tokyo' });
+    if (S.addr) { name.value = S.addr.name || ''; addr.value = S.addr.address || ''; }
+    const f = h('form', { class: 'form' },
+      h('label', { for: 'aName' }, '숙소 이름 (없어도 돼요)'), name,
+      h('label', { for: 'aAddr' }, '주소'), addr,
+      h('button', { class: 'save', type: 'submit' }, '저장하고 보여주기'));
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const a = addr.value.trim();
+      if (!a) { addr.focus(); return; }
+      S.addr = { name: name.value.trim(), address: a, lang: '', ko: '', phone: '' };
+      store.set('addr', S.addr);
+      closeSheet(); showAddress();
+    });
+    openSheet('주소 직접 쓰기', f);
+  }
+  async function readAddress(file) {
+    toast('사진에서 주소를 읽고 있어요…', 30000);
+    try {
+      const p = await prepImage(file);
+      const r = await askJSON(promptAddr(), { images: [p.blob] });
+      if (!r || !str(r.address)) { toast('사진에서 주소를 찾지 못했어요. 직접 쓰기로 넣어 주세요.', 4200); return; }
+      S.addr = { name: str(r.name), address: str(r.address), lang: normCode(r.lang), ko: str(r.ko), phone: str(r.phone) };
+      store.set('addr', S.addr);
+      toastEl.hidden = true;
+      showAddress();
+    } catch (e) {
+      toast(e && e.code ? errText(e) : '사진을 열지 못했어요. 다른 사진을 골라 주세요.', 4200);
+    }
+  }
+
+  /* emergency card */
+  function sosCountry() { return SOS_BY[S.sosCountry] || SOS_BY[COUNTRY_BY_LANG[S.them]] || SOS_BY.US; }
+  function sosNums(c) {
+    const box = h('div', { class: 'sos-nums' },
+      h('div', { class: 'sos-head' }, h('span', null, '긴급 전화'),
+        h('button', { class: 'sos-country', type: 'button', 'aria-label': '나라 바꾸기 (지금 ' + c.ko + ')', onclick: () => countrySheet((nc) => box.replaceWith(sosNums(nc))) }, c.ko, ic('chev'))));
+    for (const [lab, num] of c.nums) {
+      box.append(h('button', { class: 'sos-num', type: 'button', onclick: () => copyText(num, '번호 ' + num + '를 복사했어요. 앱에선 누르면 바로 전화가 걸려요.') }, h('span', null, lab), h('b', null, num)));
+    }
+    box.append(h('button', { class: 'sos-num consul', type: 'button', onclick: () => copyText(CONSUL.dial, '번호를 복사했어요. 앱에선 누르면 바로 전화가 걸려요.') }, h('span', null, CONSUL.label), h('b', null, CONSUL.show)));
+    return box;
+  }
+  async function showSOS() {
+    const lang = S.them;
+    let pb = pbGet(lang), idx = 0;
+    const main = h('p', { class: 'big-trans' });
+    const sub = h('p', { class: 'big-orig' });
+    const btns = SOS_LABELS.map((lab, i) => h('button', { class: 'sos-b', type: 'button', onclick: () => pick(i, true) }, lab));
+    function pick(i, say) {
+      idx = i;
+      const t = pb ? pb[IX.sos + i] : SOS_FULL[i];
+      main.textContent = t; langOn(main, pb ? lang : 'ko'); main.style.fontSize = sizeFor(t);
+      sub.textContent = pb ? SOS_FULL[i] : (engineOff() ? '번역을 쓸 수 없어서 한국어로 보여줘요.' : '번역을 불러오는 중이에요…');
+      btns.forEach((b, j) => b.classList.toggle('on', j === i));
+      if (say) speak(t, pb ? lang : 'ko', 'sos');
+    }
+    openBoard({ tone: 'sos', label: '위급 카드', body: [main, sub, h('div', { class: 'sos-lines' }, btns), sosNums(sosCountry())],
+      foot: [footBtn('speaker', '크게 읽어주기', () => speak(main.textContent, pb ? lang : 'ko', 'sos'), 'sos')] });
+    pick(0, false);
+    if (!pb && !engineOff()) {
+      try { pb = await ensurePB(lang); pick(idx, false); }
+      catch (e) { sub.textContent = '번역을 못 불러와서 한국어로 보여줘요.'; }
+    }
+  }
+  function countrySheet(onPick) {
+    const cur = sosCountry().code;
+    const list = h('div', { role: 'radiogroup', 'aria-label': '나라' });
+    for (const c of SOS_COUNTRIES) {
+      const on = c.code === cur;
+      list.append(h('button', { class: 'opt', type: 'button', role: 'radio', 'aria-checked': String(on), onclick: () => {
+        S.sosCountry = c.code; store.set('sosCountry', c.code); closeSheet(); onPick(c);
+      } }, h('span', { class: 'tag' }, c.code), h('span', { class: 'k' }, c.ko), h('span', { class: 'n' }, c.nums.map((n) => n[1]).join(' · ')), on ? ic('check', 'ck') : null));
+    }
+    openSheet('지금 있는 나라', h('div', null, h('p', { class: 'sheet-note' }, '앱에선 폰이 지금 있는 나라를 알아서 골라요.'), list));
+  }
+
+  /* ---------- face to face ---------- */
+  const fThemText = $('#fThemText'), fThemSub = $('#fThemSub'), fMeText = $('#fMeText'), fMeSub = $('#fMeSub');
+  const fThemForm = $('#fThemForm'), fMeForm = $('#fMeForm'), fThemInput = $('#fThemInput'), fMeInput = $('#fMeInput');
+  const fThemMic = $('#fThemMic'), fMeMic = $('#fMeMic');
+  function faceInputs() {
+    fThemForm.hidden = fMeForm.hidden = !micBlocked;
+    fThemMic.hidden = fMeMic.hidden = micBlocked;
+  }
+  function partnerUI() {
+    const pb = pbGet(S.them);
+    const tap = pb ? pb[IX.ui + UI_TAP] : 'Tap to speak';
+    $('#fThemMicLabel').textContent = tap;
+    fThemInput.placeholder = pb ? pb[IX.ui + UI_TYPE] : 'Type here';
+    return pb;
+  }
+  async function openFace() {
+    face.hidden = false;
+    faceInputs();
+    $('#fThemLang').textContent = CODE(S.them) + ' · ' + L[S.them].native;
+    $('#fMeLang').textContent = CODE(S.me) + ' · ' + L[S.me].ko;
+    $('#fRoute').textContent = CODE(S.me) + ' ⇄ ' + CODE(S.them);
+    fMeText.textContent = micBlocked ? '아래 칸에 ' + nameKo(S.me) + '로 쓰면 위쪽에 ' + nameKo(S.them) + '로 보여주고 읽어줘요.' : '버튼을 누르고 ' + nameKo(S.me) + '로 말하세요. 끝나면 상대 차례로 넘어가요.';
+    langOn(fMeText, 'ko'); fMeSub.textContent = '';
+    fThemSub.textContent = '';
+    fMeInput.placeholder = nameKo(S.me) + '로 쓰기';
+    $('#fMeReplies').replaceChildren(...(S.me === 'ko' ? REPLY_LABELS.map((lab, i) => h('button', { class: 'rchip', type: 'button', onclick: () => faceReply(i) }, lab)) : []));
+    let pb = partnerUI();
+    fThemText.textContent = pb ? pb[IX.ui + UI_GREET] : '…';
+    langOn(fThemText, S.them);
+    if (!pb && !engineOff()) {
+      try { pb = await ensurePB(S.them); partnerUI(); if (fThemText.textContent === '…') fThemText.textContent = pb[IX.ui + UI_GREET]; }
+      catch (e) { if (fThemText.textContent === '…') fThemText.textContent = 'Hello! Let’s talk with this translator.'; langOn(fThemText, 'en'); }
+    } else if (!pb) { fThemText.textContent = 'Hello! Let’s talk with this translator.'; langOn(fThemText, 'en'); }
+  }
+  function closeFace() { face.hidden = true; stopRec(); markSpeaking(null, false); try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
+  function partnerTurn() {
+    if (face.hidden) return;
+    if (!micBlocked) { faceMic('them'); return; }
+    fThemForm.classList.remove('turn'); void fThemForm.offsetWidth; fThemForm.classList.add('turn');
+  }
+  async function faceSay(side, text) {
+    const from = side === 'me' ? S.me : S.them, to = side === 'me' ? S.them : S.me;
+    const T = side === 'me' ? fThemText : fMeText;
+    const Sub = side === 'me' ? fThemSub : fMeSub;
+    T.replaceChildren(dots()); Sub.textContent = '';
+    const it = addItem({ kind: side === 'me' ? 'speak' : 'listen', src: from, dst: to, orig: text, trans: '', status: 'pending' });
+    await runText(it, { silent: true });
+    if (face.hidden) return;
+    if (it.status !== 'done') { T.textContent = it.err || '번역하지 못했어요.'; langOn(T, 'ko'); return; }
+    T.textContent = it.trans; langOn(T, to);
+    if (side === 'them') { Sub.textContent = text; langOn(Sub, from); }
+    speak(it.trans, to, null, () => { if (side === 'me') partnerTurn(); });
+  }
+  async function faceReply(i) {
+    fThemText.replaceChildren(dots());
+    const it = await reply(i, { silent: true });
+    if (face.hidden) return;
+    if (it.status !== 'done') { fThemText.textContent = it.err || '번역하지 못했어요.'; langOn(fThemText, 'ko'); return; }
+    fThemText.textContent = it.trans; langOn(fThemText, S.them);
+    speak(it.trans, S.them, null, partnerTurn);
+  }
+  function faceMic(side) {
+    if (rec) { stopRec(); return; }
+    const lang = side === 'me' ? S.me : S.them;
+    const mic = side === 'me' ? fMeMic : fThemMic;
+    const sub = side === 'me' ? fMeSub : fThemSub;
+    const label = mic.querySelector('span');
+    const idle = label.textContent;
+    if (side === 'them') { const pb = pbGet(S.them); label.textContent = pb ? pb[IX.ui + UI_LISTEN] : 'Listening…'; } else label.textContent = '듣는 중 · 누르면 끝';
+    mic.classList.add('rec');
+    const end = () => { mic.classList.remove('rec'); label.textContent = idle; };
+    const r = listen(lang, {
+      onPartial: (t) => { sub.textContent = t; },
+      onDone: (t) => { end(); sub.textContent = ''; faceSay(side, t); },
+      onFail: (code) => { end(); if (code === 'blocked') faceInputs(); else failToast(code, lang); },
+    });
+    if (r) { rec = r; recKind = 'face'; }
+  }
+  function faceForm(side) {
+    return (e) => {
+      e.preventDefault();
+      const inp = side === 'me' ? fMeInput : fThemInput;
+      const t = inp.value.trim();
+      if (!t) return;
+      inp.value = '';
+      faceSay(side, t);
+    };
+  }
+
+  /* ---------- sheets ---------- */
+  let lastFocus = null;
+  function openSheet(title, body) {
+    if (sheet.hidden) lastFocus = document.activeElement;
+    sheetTitle.textContent = title;
+    sheetBody.replaceChildren(body);
+    sheetBody.scrollTop = 0;
+    scrim.hidden = false; sheet.hidden = false;
+    const f = sheetBody.querySelector('button,input,textarea');
+    if (f) try { f.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+  }
+  function closeSheet() {
+    if (sheet.hidden) return;
+    scrim.hidden = true; sheet.hidden = true;
+    if (lastFocus && lastFocus.focus && document.contains(lastFocus)) try { lastFocus.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+  }
+  const opt = (icon, k, sub, fn) => h('button', { class: 'opt', type: 'button', onclick: fn }, ic(icon), h('span', { class: 'kn' }, h('b', null, k), h('small', null, sub)));
+
+  function langSheet(who) {
+    const cur = who === 'me' ? S.me : S.them;
+    const list = h('div', { role: 'radiogroup', 'aria-label': who === 'me' ? '내 언어' : '상대 언어' });
+    for (const l of LANGS) {
+      if (who === 'them' && l.code === S.me) continue;
+      const on = l.code === cur;
+      list.append(h('button', { class: 'opt', type: 'button', role: 'radio', 'aria-checked': String(on), onclick: () => { chooseLang(who, l.code); closeSheet(); } },
+        h('span', { class: 'tag' }, CODE(l.code)), h('span', { class: 'k' }, l.ko), langOn(h('span', { class: 'n' }, l.native), l.code), on ? ic('check', 'ck') : null));
+    }
+    openSheet(who === 'me' ? '내 언어' : '상대 언어', list);
+    const sel = list.querySelector('[aria-checked="true"]');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+  }
+  function chooseLang(who, code) {
+    if (who === 'me') { if (code === S.them) S.them = S.me; S.me = code; }
+    else S.them = code;
+    if (S.them === S.me) S.them = S.me === 'en' ? 'ko' : 'en';
+    store.set('me', S.me); store.set('them', S.them);
+    renderLangs();
+    renderFeed();
+  }
+  function seeSheet() {
+    if (!photoReady()) return;
+    openSheet('보기 · 사진 속 글자 번역', h('div', null,
+      opt('camera', '카메라로 비추기', '글자 위에 번역이 겹쳐 보여요 (미리보기는 한 장 찍어서)', () => { closeSheet(); pickPhoto({ kind: 'see', mode: 'lens' }, true); }),
+      opt('receipt', '메뉴판 찍고 주문하기', '먹을 것만 누르면 주문 문장을 만들어요', () => { closeSheet(); pickPhoto({ kind: 'see', mode: 'order' }, true); }),
+      opt('album', '앨범에서 가져오기', '찍어 둔 사진이나 화면 캡처', () => { closeSheet(); pickPhoto({ kind: 'see', mode: 'list' }, false); }),
+      opt('menu', '예시 메뉴판으로 해보기', '영어 카페 메뉴판으로 바로 확인', () => { closeSheet(); samplePhoto('lens'); })));
+  }
+  function settingsSheet() {
+    const sw = (on, fn, label) => {
+      const b = h('button', { class: 'sw', type: 'button', role: 'switch', 'aria-checked': String(on), 'aria-label': label });
+      b.addEventListener('click', () => { const v = b.getAttribute('aria-checked') !== 'true'; b.setAttribute('aria-checked', String(v)); fn(v); });
+      return b;
+    };
+    const row = (label, sub, control) => h('div', { class: 'row' }, h('div', { class: 'row-t' }, h('b', null, label), h('small', null, sub)), control);
+    let armed = false, armT = 0;
+    const clear = h('button', { class: 'danger', type: 'button' }, '기록 모두 지우기');
+    clear.addEventListener('click', () => {
+      if (!S.items.length) { toast('지울 기록이 없어요.'); return; }
+      if (!armed) {
+        armed = true; clear.textContent = '한 번 더 누르면 모두 지워요';
+        armT = setTimeout(() => { armed = false; clear.textContent = '기록 모두 지우기'; }, 3000);
+        return;
+      }
+      clearTimeout(armT);
+      for (const u of fullURL.values()) { try { URL.revokeObjectURL(u); } catch (e) { /* ignore */ } }
+      S.items = []; blobs.clear(); fullURL.clear(); save(); renderFeed(); closeSheet(); toast('기록을 지웠어요.');
+    });
+    const wb = (icon, label, fn) => h('button', { class: 'w-b', type: 'button', onclick: () => { closeSheet(); fn(); } }, ic(icon), h('span', null, label));
+    openSheet('설정', h('div', null,
+      row('말하기 결과 바로 읽어주기', '번역되면 상대 언어로 소리 내 읽어요', sw(S.autoSpeak, (v) => { S.autoSpeak = v; store.set('autoSpeak', v); }, '말하기 결과 바로 읽어주기')),
+      row('천천히 읽기', '외국 사람이 알아듣기 쉽게 느리게 읽어요', sw(S.slow, (v) => { S.slow = v; store.set('slow', v); }, '천천히 읽기')),
+      h('div', { class: 'set-block' }, h('b', null, '홈 화면 위젯'),
+        h('div', { class: 'widget' }, h('div', { class: 'w-head' }, h('span', { class: 'mark sm' }, ic('swap')), h('b', null, '이음')),
+          h('div', { class: 'w-btns' }, wb('ear', '듣기', () => voice('listen')), wb('head', '말하기', () => voice('speak')), wb('eye', '보기', seeSheet))),
+        h('small', null, '앱에선 홈 화면에 놓고, 누르면 앱이 열리자마자 마이크나 카메라가 켜져요. 여기선 눌러서 미리 써 보세요.')),
+      h('div', { class: 'row' }, clear),
+      h('p', { class: 'about' }, '이음 ' + VER + ' · 미리보기에선 Claude가 번역해요. 앱(APK)에선 폰 안에서 번역하고, 언어를 고르면 와이파이에서 번역 팩을 알아서 받아 둬서 인터넷 없이도 번역돼요.')));
+  }
+
+  /* ---------- copy ---------- */
+  function copyFallback(text, okMsg) {
+    const ta = h('textarea', { readonly: true, 'aria-hidden': 'true' });
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-1000px;left:0;opacity:0';
+    document.body.append(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    toast(ok ? (okMsg || '복사했어요.') : '복사가 막혀 있어요. 글자를 길게 눌러 복사해 주세요.', okMsg ? 3600 : 2800);
+  }
+  function copyText(text, okMsg) {
+    try { navigator.clipboard.writeText(text).then(() => toast(okMsg || '복사했어요.', okMsg ? 3600 : 2800), () => copyFallback(text, okMsg)); }
+    catch (e) { copyFallback(text, okMsg); }
+  }
+
+  /* ---------- languages on screen ---------- */
+  function renderLangs() {
+    $('#meCode').textContent = CODE(S.me); $('#meName').textContent = nameKo(S.me);
+    $('#themCode').textContent = CODE(S.them); $('#themName').textContent = nameKo(S.them);
+    setRec(rec, recKind);
+    btnSee.querySelector('small').textContent = route('see');
+    btnListen.setAttribute('aria-label', '듣기: ' + nameKo(S.them) + ' 말을 듣고 ' + nameKo(S.me) + '로 보여줘요');
+    btnSpeak.setAttribute('aria-label', '말하기: ' + nameKo(S.me) + '로 말하면 ' + nameKo(S.them) + '로 읽어줘요');
+    btnSee.setAttribute('aria-label', '보기: 사진 속 글자를 번역해요');
+    $('#phrases').hidden = S.me !== 'ko';
+    setMode(mode);
+  }
+
+  /* ---------- wire up ---------- */
+  document.querySelectorAll('svg[data-ic]').forEach((s) => {
+    s.setAttribute('viewBox', '0 0 24 24');
+    s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = ICONS[s.dataset.ic] || '';
+  });
+  $('#verTxt').textContent = VER;
+  $('#phrases').replaceChildren(...PHRASES.map((p, i) => h('button', { class: 'chip', type: 'button', onclick: () => phrase(i) }, p)));
+  $('#meBtn').addEventListener('click', () => langSheet('me'));
+  $('#themBtn').addEventListener('click', () => langSheet('them'));
+  $('#swapBtn').addEventListener('click', () => {
+    stopRec();
+    const t = S.me; S.me = S.them; S.them = t;
+    store.set('me', S.me); store.set('them', S.them);
+    $('#swapBtn').classList.toggle('spin');
+    renderLangs(); renderFeed();
+    toast('나 ' + nameKo(S.me) + ' ⇄ 상대 ' + nameKo(S.them), 1600);
+  });
+  $('#btnSet').addEventListener('click', settingsSheet);
+  $('#tFace').addEventListener('click', openFace);
+  $('#tAddr').addEventListener('click', showAddress);
+  $('#tSos').addEventListener('click', showSOS);
+  btnListen.addEventListener('click', () => voice('listen'));
+  btnSpeak.addEventListener('click', () => voice('speak'));
+  btnSee.addEventListener('click', seeSheet);
+  scrim.addEventListener('click', closeSheet);
+  $('#sheetClose').addEventListener('click', closeSheet);
+  $('#bigClose').addEventListener('click', closeBoard);
+  $('#bigFlip').addEventListener('click', () => bigBody.classList.toggle('flip'));
+  $('#lensClose').addEventListener('click', closeLens);
+  $('#faceClose').addEventListener('click', closeFace);
+  fThemForm.addEventListener('submit', faceForm('them'));
+  fMeForm.addEventListener('submit', faceForm('me'));
+  fThemMic.addEventListener('click', () => faceMic('them'));
+  fMeMic.addEventListener('click', () => faceMic('me'));
+  $('#modeX').addEventListener('click', () => { setMode(null); input.focus(); });
+  input.addEventListener('input', () => { sendBtn.disabled = !input.value.trim(); });
+  form.addEventListener('submit', onSubmit);
+  fileCam.addEventListener('change', onFile);
+  fileAlbum.addEventListener('change', onFile);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!sheet.hidden) closeSheet();
+    else if (!big.hidden) closeBoard();
+    else if (!lens.hidden) closeLens();
+    else if (!face.hidden) closeFace();
+  });
+  // Entry point the app's home-screen widget will call: listen | speak | see | face | sos | addr
+  window.tongyeokOpen = (what) => ({ listen: () => voice('listen'), speak: () => voice('speak'), see: seeSheet, face: openFace, sos: showSOS, addr: showAddress }[what] || (() => {}))();
+
+  renderLangs();
+  renderNote();
+  renderFeed();
+  if (S.items.length) scrollEnd();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { if (!S.items.length) { redrawExample(); renderFeed(); } }).catch(() => {});
+  }
+})();
+</script>

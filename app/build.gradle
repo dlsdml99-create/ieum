@@ -1,0 +1,55 @@
+plugins { id 'com.android.application' }
+// 버전: 미리보기가 v1.3까지 나왔으므로 앱은 v1.4부터 (GitHub 빌드 번호 + 3)
+def ver = (System.getenv('RUN_NUMBER') ?: '1').toInteger() + 3
+android {
+    namespace 'com.ieum.app'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.ieum.app'
+        minSdk 24
+        targetSdk 34
+        versionCode ver
+        versionName "1.${ver}"
+        // 실제 폰(ARM)용만 넣기: 에뮬레이터용 기계어를 빼서 용량을 줄임
+        ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
+    }
+    signingConfigs {
+        fixed {
+            // 업데이트가 덮어 설치되려면 항상 같은 열쇠로 서명해야 함
+            storeFile file('ieum.jks')
+            // 열쇠는 암호화돼 있고(ieum.jks.enc), 비밀번호는 GitHub 비밀값 IEUM_KEY에만 있음
+            storePassword System.getenv('KEY_PASS') ?: ''
+            keyAlias 'ieum'
+            keyPassword System.getenv('KEY_PASS') ?: ''
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.fixed }
+        // 배포용: 안 쓰는 코드·리소스를 지워 용량을 줄이고 빠르게
+        release {
+            signingConfig signingConfigs.fixed
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    lint { checkReleaseBuilds false; abortOnError false }
+    packagingOptions { resources { excludes += ['META-INF/*.version', 'META-INF/*.kotlin_module', 'kotlin/**', 'DebugProbesKt.bin'] } }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+dependencies {
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.webkit:webkit:1.11.0'
+    // 번역·언어 알아내기: 폰 안에서 (번역 팩은 언어별로 처음 한 번 받음)
+    implementation 'com.google.mlkit:translate:17.0.3'
+    implementation 'com.google.mlkit:language-id:17.0.5'
+    // 글자 읽기: 폰의 Google Play 서비스에 있는 엔진을 빌려 씀 (앱 용량 절약)
+    implementation 'com.google.android.gms:play-services-mlkit-text-recognition-korean:16.0.2'
+    implementation 'com.google.android.gms:play-services-mlkit-text-recognition-japanese:16.0.1'
+    implementation 'com.google.android.gms:play-services-mlkit-text-recognition-chinese:16.0.1'
+    implementation 'com.google.android.gms:play-services-mlkit-text-recognition-devanagari:16.0.1'
+}

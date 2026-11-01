@@ -1,0 +1,6 @@
+build/
+.gradle/
+app/build/
+*.apk
+local.properties
+app/ieum.jks
