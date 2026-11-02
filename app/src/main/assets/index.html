@@ -246,9 +246,9 @@ p{margin:0}
 .big-body.flip{transform:rotate(180deg)}
 .big-kicker{font-size:14px;font-weight:700;opacity:.7}
 .big-lead{font-size:24px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
-.big-trans{font-weight:700;line-height:1.22;overflow-wrap:anywhere;text-wrap:balance}
+.big-trans{font-weight:700;line-height:1.22;overflow-wrap:anywhere;text-wrap:balance;white-space:pre-line}
 .big-addr{font-size:26px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
-.big-orig{font-size:17px;color:var(--sign-muted);overflow-wrap:anywhere}
+.big-orig{font-size:17px;color:var(--sign-muted);overflow-wrap:anywhere;white-space:pre-line}
 .big.sos .big-orig{color:var(--on-rec);opacity:.85}
 .big-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .big-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:6px;border-top:2px solid currentColor;font-size:26px;font-weight:700;line-height:1.25}
@@ -973,6 +973,7 @@ p{margin:0}
     c.append(h('div', { class: 'acts' },
       priced ? h('button', { class: 'act-b', type: 'button', onclick: () => orderSheet(it) }, ic('receipt'), h('span', null, '주문하기'), n ? h('em', null, String(n)) : null) : null,
       overlay ? btn('layers', '사진 위에', () => openLens(it)) : null,
+      btn('expand', '크게 보기', () => openBig(it.lines.map((l) => l.t).join('\n'), it.lines.map((l) => l.o).join('\n'), it.dst || S.me, it.src)),
       btn('copy', '복사', () => copyText(it.lines.map((l) => l.o + '\n' + l.t).join('\n\n'))), starBtn(it, ex)));
     return c;
   }
@@ -1974,7 +1975,7 @@ p{margin:0}
 })();
 </script>
 <!--APPINFO--><script>
-window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요."};
+window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.01", "items": ["사진 번역(보기) 카드에도 크게 보기"]}, {"v": "v1.11", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요."};
 window.APP_INFO.online=!!window.Ieum;
 window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){return '1.8'}};
 </script>
