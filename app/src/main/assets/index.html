@@ -165,6 +165,11 @@ p{margin:0}
 .dock .wrap{padding-block:8px 4px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 .phrases{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .phrases::-webkit-scrollbar{display:none}
+.sits{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px}.sits::-webkit-scrollbar{display:none}
+.sits button{flex:none;height:26px;padding:0 10px;border:0;border-radius:13px;background:transparent;color:var(--ink-2,inherit);font:inherit;font-size:12.5px;font-weight:600}
+.sits button[aria-selected="true"]{background:var(--ink,#111);color:var(--surface,#fff)}
+.tzsug{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-size:13px}
+.tzsug span{flex:1;min-width:0}.tzx{flex:none;width:30px;height:30px;border:0;background:transparent;color:inherit;display:grid;place-items:center}
 .chip{flex:none;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:13px;font-weight:500;white-space:nowrap}
 .compose{display:flex;gap:6px;margin:0}
 .field{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:44px;padding:0 4px 0 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
@@ -385,6 +390,8 @@ p{margin:0}
 
   <footer class="dock">
     <div class="wrap">
+      <div class="tzsug" id="tzSug" hidden><span id="tzMsg"></span><button type="button" class="chip" id="tzYes">바꾸기</button><button type="button" class="tzx" id="tzNo" aria-label="괜찮아요"><svg class="i" data-ic="close"></svg></button></div>
+      <div class="sits" id="sits" role="tablist" aria-label="상황별 문장"></div>
       <div class="phrases" id="phrases" role="group" aria-label="자주 쓰는 말"></div>
       <form class="compose" id="compose" autocomplete="off">
         <div class="field">
@@ -1088,6 +1095,54 @@ p{margin:0}
     try { const pb = await ensurePB(S.them); finish(it, pb[IX.reply + i], opts); }
     catch (e) { it.status = 'error'; it.err = errText(e); updateItem(it); }
     return it;
+  }
+
+
+  /* ---------- 상황별 문장 (처음 한 번 폰에서 번역해 두면 다음부터 바로) ---------- */
+  const SITS = [
+    ['자주', null],
+    ['식당', ['메뉴 좀 주세요', '이거 맵나요?', '안 맵게 해 주세요', '물 좀 주세요', '두 명이에요', '포장해 주세요', '이거 하나 더 주세요', '카드 돼요?']],
+    ['호텔', ['체크인할게요', '예약했어요', '짐 좀 맡아 주세요', '와이파이 비밀번호가 뭐예요?', '수건 더 주세요', '체크아웃은 몇 시예요?', '방이 너무 추워요', '택시 불러 주세요']],
+    ['교통', ['이 주소로 가 주세요', '여기서 세워 주세요', '역이 어디예요?', '이 버스 ○○ 가요?', '얼마나 걸려요?', '표 한 장 주세요', '여기 어떻게 가요?', '걸어갈 수 있어요?']],
+    ['쇼핑', ['이거 얼마예요?', '깎아 주세요', '다른 색 있어요?', '입어 봐도 돼요?', '더 큰 사이즈 있어요?', '면세 돼요?', '영수증 주세요', '그냥 구경할게요']],
+    ['공항', ['체크인 어디서 해요?', '창가 자리로 주세요', '이 짐 부칠게요', '몇 번 게이트예요?', '비행기가 늦어요?', '짐이 안 나왔어요', '환승은 어디로 가요?', '택시 타는 곳이 어디예요?']],
+  ];
+  let sitI = 0;
+  function renderSits() {
+    $('#sits').replaceChildren(...SITS.map(([n], i) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(i === sitI), onclick: () => { sitI = i; renderSits(); } }, n)));
+    const list = SITS[sitI][1];
+    $('#phrases').replaceChildren(...(list ? list.map((t) => h('button', { class: 'chip', type: 'button', onclick: () => sitPhrase(t) }, t))
+      : PHRASES.map((p, i) => h('button', { class: 'chip', type: 'button', onclick: () => phrase(i) }, p))));
+    $('#phrases').scrollLeft = 0;
+  }
+  async function sitPhrase(t) {
+    const lang = S.them, memo = store.get('sp.' + lang, {}) || {};
+    const it = addItem({ kind: 'speak', src: S.me, dst: lang, orig: t, trans: '', status: 'pending' });
+    if (typeof memo[t] === 'string' && memo[t]) { finish(it, memo[t]); return; }
+    try { const tr = await trText(t, 'ko', lang); if (tr) { memo[t] = tr; store.set('sp.' + lang, memo); } finish(it, tr); }
+    catch (e) { it.status = 'error'; it.err = errText(e); updateItem(it); }
+  }
+
+  /* ---------- 해외에 가면 폰 시간대를 보고 상대 언어 바꾸기를 한 번 제안 (인터넷·위치 권한 안 씀) ---------- */
+  function tzLang() {
+    let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return null; }
+    const M = { 'Asia/Tokyo': 'ja', 'Asia/Shanghai': 'zh', 'Asia/Hong_Kong': 'zh', 'Asia/Macau': 'zh', 'Asia/Taipei': 'zh', 'Asia/Chongqing': 'zh', 'Asia/Harbin': 'zh',
+      'Asia/Bangkok': 'th', 'Asia/Ho_Chi_Minh': 'vi', 'Asia/Saigon': 'vi', 'Asia/Jakarta': 'id', 'Asia/Makassar': 'id', 'Asia/Kuala_Lumpur': 'ms', 'Asia/Manila': 'tl',
+      'Asia/Singapore': 'en', 'Asia/Kolkata': 'hi', 'Asia/Calcutta': 'hi', 'Asia/Dubai': 'ar', 'Asia/Riyadh': 'ar', 'Asia/Qatar': 'ar', 'Africa/Cairo': 'ar',
+      'Europe/Paris': 'fr', 'Europe/Brussels': 'fr', 'Europe/Berlin': 'de', 'Europe/Vienna': 'de', 'Europe/Zurich': 'de', 'Europe/Rome': 'it', 'Europe/Madrid': 'es',
+      'Europe/Lisbon': 'pt', 'Europe/Moscow': 'ru', 'Europe/Istanbul': 'tr', 'Europe/Amsterdam': 'nl', 'Europe/London': 'en', 'Europe/Dublin': 'en',
+      'America/Mexico_City': 'es', 'America/Cancun': 'es', 'America/Bogota': 'es', 'America/Lima': 'es', 'America/Santiago': 'es', 'America/Argentina/Buenos_Aires': 'es', 'America/Sao_Paulo': 'pt',
+      'Pacific/Guam': 'en', 'Pacific/Saipan': 'en', 'Pacific/Auckland': 'en', 'Pacific/Honolulu': 'en' };
+    const code = M[tz] || (/^(America|Australia|Canada)\//.test(tz) ? 'en' : '');
+    return code && L[code] ? { tz, code } : null;
+  }
+  function tzSuggest() {
+    const g = tzLang(), box = $('#tzSug');
+    if (!g || S.me !== 'ko' || S.them === g.code || store.get('tzNo', '') === g.tz) { box.hidden = true; return; }
+    $('#tzMsg').textContent = `지금 ${nameKo(g.code)}를 쓰는 곳의 시간대예요. 상대 언어를 ${nameKo(g.code)}로 바꿀까요?`;
+    box.hidden = false;
+    $('#tzYes').onclick = () => { box.hidden = true; chooseLang('them', g.code); toast(`상대 언어를 ${nameKo(g.code)}로 바꿨어요`); };
+    $('#tzNo').onclick = () => { box.hidden = true; store.set('tzNo', g.tz); };
   }
 
   /* ---------- compose (typing, and the preview's stand-in for the microphone) ---------- */
@@ -1896,7 +1951,7 @@ p{margin:0}
     btnListen.setAttribute('aria-label', '듣기: ' + nameKo(S.them) + ' 말을 듣고 ' + nameKo(S.me) + '로 보여줘요');
     btnSpeak.setAttribute('aria-label', '말하기: ' + nameKo(S.me) + '로 말하면 ' + nameKo(S.them) + '로 읽어줘요');
     btnSee.setAttribute('aria-label', '보기: 사진 속 글자를 번역해요');
-    $('#phrases').hidden = S.me !== 'ko';
+    $('#phrases').hidden = S.me !== 'ko'; $('#sits').hidden = S.me !== 'ko';
     setMode(mode);
   }
 
@@ -1909,7 +1964,8 @@ p{margin:0}
     s.innerHTML = ICONS[s.dataset.ic] || '';
   });
   $('#verTxt').textContent = VER;
-  $('#phrases').replaceChildren(...PHRASES.map((p, i) => h('button', { class: 'chip', type: 'button', onclick: () => phrase(i) }, p)));
+  renderSits(); tzSuggest();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tzSuggest(); });
   $('#meBtn').addEventListener('click', () => langSheet('me'));
   $('#themBtn').addEventListener('click', () => langSheet('them'));
   $('#swapBtn').addEventListener('click', () => {
@@ -1978,7 +2034,7 @@ p{margin:0}
 
 
 <!--APPINFO--><script>
-window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.05", "items": ["크게 보기를 열면 밝은 곳에서도 잘 보이게 화면이 가장 밝아져요 (닫으면 원래대로)", "왼쪽 아래 버전 → 내 데이터 백업: 기록을 파일로 저장했다가 새 폰에서 불러오기"]}, {"v": "v1.12", "d": "2026.11.01", "items": ["사진 번역(보기) 카드에도 크게 보기"]}, {"v": "v1.11", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요.", "backup": {"keys": ["ieum.*"], "bridge": "Ieum"}};
+window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.05", "items": ["상황별 문장: 식당·호텔·교통·쇼핑·공항 문장을 눌러서 바로 (한 번 번역하면 다음부터 인터넷 없이 바로)", "해외에 가면 폰 시간대를 보고 상대 언어를 그 나라 말로 바꿀지 한 번 물어봐요"]}, {"v": "v1.13", "d": "2026.11.05", "items": ["크게 보기를 열면 밝은 곳에서도 잘 보이게 화면이 가장 밝아져요 (닫으면 원래대로)", "왼쪽 아래 버전 → 내 데이터 백업: 기록을 파일로 저장했다가 새 폰에서 불러오기"]}, {"v": "v1.12", "d": "2026.11.01", "items": ["사진 번역(보기) 카드에도 크게 보기"]}, {"v": "v1.11", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요.", "backup": {"keys": ["ieum.*"], "bridge": "Ieum"}};
 window.APP_INFO.online=!!window.Ieum;
 window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){return '1.8'}};
 </script>
