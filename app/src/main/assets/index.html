@@ -780,6 +780,7 @@ p{margin:0}
   }
   function prepareModels() { try { if (NB) NB.prepare(S.me, S.them); } catch (e) { /* ignore */ } }
   function keepOn(on) { try { if (NB) NB.keepOn(!!on); } catch (e) { /* ignore */ } }
+  function bright(on) { try { if (NB && NB.bright) NB.bright(!!on); } catch (e) { /* ignore */ } }
   function applyRates(o) {
     if (!o || !o.rates) return;
     for (const [c, v] of Object.entries(o.rates)) { const n = +v; if (n > 0 && isFinite(n)) KRW_PER[c] = n; }
@@ -1567,12 +1568,12 @@ p{margin:0}
     bigFoot.replaceChildren(...(o.foot || []).filter(Boolean));
     bigBody.scrollTop = 0;
     big.hidden = false;
-    keepOn(true);
+    keepOn(true); bright(true);
     try { $('#bigClose').focus({ preventScroll: true }); } catch (e) { /* ignore */ }
   }
   function closeBoard() {
     big.hidden = true;
-    stopSpeak();
+    stopSpeak(); bright(false);
     if (face.hidden && !live) keepOn(false);
   }
   function openBig(main, sub, code, subCode) {
@@ -1974,8 +1975,10 @@ p{margin:0}
   }
 })();
 </script>
+
+
 <!--APPINFO--><script>
-window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.01", "items": ["사진 번역(보기) 카드에도 크게 보기"]}, {"v": "v1.11", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요."};
+window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.05", "items": ["크게 보기를 열면 밝은 곳에서도 잘 보이게 화면이 가장 밝아져요 (닫으면 원래대로)", "왼쪽 아래 버전 → 내 데이터 백업: 기록을 파일로 저장했다가 새 폰에서 불러오기"]}, {"v": "v1.12", "d": "2026.11.01", "items": ["사진 번역(보기) 카드에도 크게 보기"]}, {"v": "v1.11", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요.", "backup": {"keys": ["ieum.*"], "bridge": "Ieum"}};
 window.APP_INFO.online=!!window.Ieum;
 window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){return '1.8'}};
 </script>
@@ -1983,7 +1986,7 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
 /* ───── 앱 정보 창 (모든 앱 공통) ─────
    왼쪽 아래 버전을 누르면: 앱 이름·버전, 최신인지, 새 버전 확인, 업데이트 내용, 개인정보.
    새 버전이 있으면 버전 글씨가 노란색으로 바뀐다.
-   설정: window.APP_INFO = { name, repo, version, online, mount, notes:[{v,d,items}], privacy }
+   설정: window.APP_INFO = { name, repo, version, online, mount, notes:[{v,d,items}], privacy, backup }
    - version: '1.8' 또는 함수. 'current'인 업데이트 항목은 지금 버전으로 표시
    - online: 앱(APK) 안이면 true. 미리보기에서는 인터넷을 쓰지 않음
    - mount: 이미 있는 버전 글씨의 CSS 선택자 (없으면 왼쪽 아래에 새로 만듦)
@@ -2072,11 +2075,116 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
     'button:focus-visible,a:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}';
   var isOpen = false;
   function statusHTML() {
-    if (!C.online) return '미리보기에서는 새 버전을 확인하지 않아요. 앱에서는 자동으로 확인해요.';
+    if (!C.online) return C.web ? '웹앱은 열 때마다 저절로 최신 버전으로 바뀌어요.' : '미리보기에서는 새 버전을 확인하지 않아요. 앱에서는 자동으로 확인해요.';
     if (checking) return '새 버전을 확인하는 중이에요…';
     if (hasUpdate()) return '새 버전 <b>v' + esc(norm(latest.v)) + '</b>이 나왔어요.';
     if (failed && !latest) return '새 버전을 확인하지 못했어요. 인터넷 연결을 확인해 주세요.';
     return latest ? '지금 쓰는 버전이 최신이에요.' : '새 버전 확인을 눌러 주세요.';
+  }
+  /* ── 내 데이터 백업: 이 기기에 저장된 것(설정·기록·사진)을 파일 하나로 저장하고 다시 불러오기.
+     파일은 사용자가 고른 곳(내 파일·드라이브 등)에만 저장되고, 앱이 인터넷으로 보내지 않는다.
+     설정: APP_INFO.backup = { keys:['이름', '접두어*'], idb:[{db, store}], bridge:'Android', save:fn(name,text)->Promise }  ── */
+  var B = C.backup || null, bk = { msg: '', busy: false, pending: null };
+  var bkBridge = function () { var b = B && B.bridge && window[B.bridge]; return b && typeof b.backupSave === 'function' ? b : null; };
+  function lsKeys() {
+    var out = [];
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('appinfo.') !== 0 && (B.keys || []).some(function (p) { return k === p || (p.slice(-1) === '*' && k.indexOf(p.slice(0, -1)) === 0); })) out.push(k); } } catch (e) { /* 저장 공간 없음 */ }
+    return out;
+  }
+  function toPlain(v) {
+    if (v instanceof Blob) return new Promise(function (res) { var r = new FileReader(); r.onload = function () { res({ __blob: String(r.result) }); }; r.onerror = function () { res(null); }; r.readAsDataURL(v); });
+    if (Array.isArray(v)) return Promise.all(v.map(toPlain));
+    if (v && typeof v === 'object' && !(v instanceof Date)) { var ks = Object.keys(v); return Promise.all(ks.map(function (k) { return toPlain(v[k]); })).then(function (vs) { var o = {}; ks.forEach(function (k, i) { o[k] = vs[i]; }); return o; }); }
+    return Promise.resolve(v);
+  }
+  function fromPlain(v) {
+    if (Array.isArray(v)) return v.map(fromPlain);
+    if (v && typeof v === 'object') {
+      if (typeof v.__blob === 'string' && Object.keys(v).length === 1) { try { var p = v.__blob.split(','), bin = atob(p[1]), a = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type: (p[0].match(/^data:([^;]+)/) || [])[1] || '' }); } catch (e) { return null; } }
+      var o = {}; Object.keys(v).forEach(function (k) { o[k] = fromPlain(v[k]); }); return o;
+    }
+    return v;
+  }
+  function idbOpen(name, store) {
+    return new Promise(function (res) {
+      try { var r = indexedDB.open(name); r.onupgradeneeded = function () { try { r.result.createObjectStore(store); } catch (e) { /* 이미 있음 */ } }; r.onsuccess = function () { res(r.result); }; r.onerror = function () { res(null); }; } catch (e) { res(null); }
+    });
+  }
+  function idbDump(d) {
+    return idbOpen(d.db, d.store).then(function (db) {
+      if (!db || !db.objectStoreNames.contains(d.store)) return [];
+      return new Promise(function (res) {
+        var out = []; try { var q = db.transaction(d.store).objectStore(d.store).openCursor();
+          q.onsuccess = function () { var c = q.result; if (c) { out.push([c.key, c.value]); c.continue(); } else res(out); }; q.onerror = function () { res(out); };
+        } catch (e) { res(out); }
+      }).then(function (rows) { db.close(); return Promise.all(rows.map(function (r) { return toPlain(r[1]).then(function (v) { return [r[0], v]; }); })); });
+    });
+  }
+  function idbLoad(d, rows) {
+    return idbOpen(d.db, d.store).then(function (db) {
+      if (!db || !db.objectStoreNames.contains(d.store)) return;
+      return new Promise(function (res) {
+        try { var tx = db.transaction(d.store, 'readwrite'), s = tx.objectStore(d.store); s.clear(); (rows || []).forEach(function (r) { s.put(fromPlain(r[1]), r[0]); }); tx.oncomplete = function () { db.close(); res(); }; tx.onerror = function () { db.close(); res(); }; } catch (e) { res(); }
+      });
+    });
+  }
+  function bkSet(m, busy) { bk.msg = m; bk.busy = !!busy; if (isOpen) render(); }
+  function bkName() { var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; }; return C.name + '-백업-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.json'; }
+  function bkSave() {
+    if (bk.busy) return; bkSet('백업 파일을 만드는 중이에요…', true);
+    var ls = {}; lsKeys().forEach(function (k) { ls[k] = localStorage.getItem(k); });
+    Promise.all((B.idb || []).map(idbDump)).then(function (dumps) {
+      var idb = {}; (B.idb || []).forEach(function (d, i) { idb[d.db + '/' + d.store] = dumps[i]; });
+      var text = JSON.stringify({ app: C.name, repo: C.repo, version: cur(), at: new Date().toISOString(), ls: ls, idb: idb }), name = bkName(), br = bkBridge();
+      if (br) { bkSet('저장할 곳을 골라 주세요 (내 파일·드라이브 등)', true); br.backupSave(name, text); return; }
+      if (typeof B.save === 'function') { Promise.resolve(B.save(name, text)).then(function (ok) { bkDone(ok !== false, ok === false ? 'cancel' : ''); }, function () { bkDone(false); }); return; }
+      var blob = new Blob([text], { type: 'application/json' }), f = window.File ? new File([blob], name, { type: 'application/json' }) : null;
+      if (f && navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: name }).then(function () { bkDone(true); }, function (e) { bkDone(false, e && e.name === 'AbortError' ? 'cancel' : ''); }); return; }
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000); bkDone(true);
+    }, function () { bkDone(false); });
+  }
+  function bkDone(ok, why) { bkSet(ok ? '백업 파일을 저장했어요. 새 폰에서는 이 화면의 "백업 불러오기"로 넣으면 돼요.' : why === 'cancel' ? '' : '백업 파일을 저장하지 못했어요. 다시 해 주세요.'); }
+  function bkOpen() {
+    if (bk.busy) return; bk.pending = null;
+    var br = bkBridge(); if (br && typeof br.backupOpen === 'function') { bkSet('백업 파일을 골라 주세요', true); br.backupOpen(); return; }
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json,text/plain,application/octet-stream,.json'; inp.style.display = 'none'; document.body.appendChild(inp);
+    inp.addEventListener('change', function () { var f = inp.files && inp.files[0]; inp.remove(); if (!f) return; var r = new FileReader(); r.onload = function () { bkOpened(String(r.result)); }; r.onerror = function () { bkOpened(null); }; r.readAsText(f); });
+    inp.click();
+  }
+  function bkOpened(text) {
+    if (text == null) { bkSet(''); return; }
+    var o = null; try { o = JSON.parse(text); } catch (e) { o = null; }
+    if (!o || typeof o.ls !== 'object' || !o.ls) { bkSet('이 파일은 백업 파일이 아니에요.'); return; }
+    if (o.repo !== C.repo) { bkSet('이 파일은 ' + (o.app ? '“' + o.app + '” 앱의' : '다른 앱의') + ' 백업이에요. ' + C.name + ' 백업 파일을 골라 주세요.'); return; }
+    bk.pending = o; bkSet('');
+  }
+  var bkMatch = function (k) { return (B.keys || []).some(function (p) { return k === p || (p.slice(-1) === '*' && String(k).indexOf(p.slice(0, -1)) === 0); }); };
+  function bkApply() {
+    var o = bk.pending; if (!o) return; bkSet('불러오는 중이에요…', true);
+    var SP = Storage.prototype, set0 = SP.setItem, rm0 = SP.removeItem, old = {};
+    lsKeys().forEach(function (k) { old[k] = localStorage.getItem(k); });
+    try { lsKeys().forEach(function (k) { rm0.call(localStorage, k); });
+      Object.keys(o.ls).forEach(function (k) { if (typeof o.ls[k] === 'string' && bkMatch(k)) set0.call(localStorage, k, o.ls[k]); });
+    } catch (e) {
+      try { lsKeys().forEach(function (k) { rm0.call(localStorage, k); }); Object.keys(old).forEach(function (k) { set0.call(localStorage, k, old[k]); }); } catch (e2) { /* 무시 */ }
+      bk.pending = null; bkSet('저장 공간이 부족해서 불러오지 못했어요. 원래 기록은 그대로예요.'); return;
+    }
+    /* 다시 열리기 전에 앱이 예전 기록을 덮어쓰지 못하게 잠금 */
+    SP.setItem = function (k, v) { if (this === localStorage && bkMatch(k)) return; return set0.apply(this, arguments); };
+    SP.removeItem = function (k) { if (this === localStorage && bkMatch(k)) return; return rm0.apply(this, arguments); };
+    Promise.all((B.idb || []).map(function (d) { var rows = o.idb && o.idb[d.db + '/' + d.store]; return rows ? idbLoad(d, rows) : Promise.resolve(); })).then(function () {
+      bkSet('다 불러왔어요! 잠깐 뒤 다시 열려요.', true); setTimeout(function () { try { location.reload(); } catch (e) { /* 무시 */ } }, 700);
+    });
+  }
+  function bkHTML() {
+    if (!B) return '';
+    var p = bk.pending, when = p && p.at ? new Date(p.at) : null;
+    return '<p class="lbl">내 데이터 백업</p>' +
+      (p ? '<p class="hint">' + esc((when && !isNaN(when) ? (when.getMonth() + 1) + '월 ' + when.getDate() + '일 ' : '') + '백업 (v' + (p.version || '?') + ')') + '을 불러오면 지금 이 폰의 ' + esc(C.name) + ' 기록이 백업 내용으로 바뀌어요.</p>' +
+        '<div class="row"><button class="btn main" type="button" data-bk="apply"' + (bk.busy ? ' disabled' : '') + '>불러오기</button><button class="btn" type="button" data-bk="cancel">취소</button></div>'
+      : '<p class="hint">폰을 바꾸거나 앱을 지우기 전에 파일로 저장해 두세요. 파일은 내가 고른 곳에만 저장되고 인터넷으로 보내지 않아요.</p>' +
+        '<div class="row"><button class="btn" type="button" data-bk="save"' + (bk.busy ? ' disabled' : '') + '>백업 파일로 저장</button><button class="btn" type="button" data-bk="open"' + (bk.busy ? ' disabled' : '') + '>백업 불러오기</button></div>') +
+      (bk.msg ? '<p class="hint" role="status">' + esc(bk.msg) + '</p>' : '');
   }
   function render() {
     var up = hasUpdate();
@@ -2092,11 +2200,13 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
       '<p class="msg">' + statusHTML() + '</p>' +
       '<div class="row">' + (up && latest.url ? '<a class="btn main" href="' + esc(latest.url) + '" target="_blank" rel="noopener">업데이트 받기</a>' : '') +
       (C.online ? '<button class="btn" type="button" data-chk' + (checking ? ' disabled' : '') + '>새 버전 확인</button>' : '') + '</div>' +
+      bkHTML() +
       '<p class="lbl">업데이트 내용</p><ul class="notes">' + notes + '</ul>' +
       '<p class="lbl">개인정보</p><p class="hint">' + esc(C.privacy || '') + '</p></div></div>';
     root.querySelectorAll('[data-x]').forEach(function (b) { b.addEventListener('click', close); });
     var c = root.querySelector('[data-chk]');
     if (c) c.addEventListener('click', function () { check(true); });
+    root.querySelectorAll('[data-bk]').forEach(function (b) { b.addEventListener('click', function () { var k = b.getAttribute('data-bk'); if (k === 'save') bkSave(); else if (k === 'open') bkOpen(); else if (k === 'apply') bkApply(); else { bk.pending = null; bkSet(''); } }); });
   }
   function open() { isOpen = true; host.style.display = 'block'; render(); var sh = root.querySelector('.sheet'); if (sh) sh.focus(); if (C.online && !checking && (!latest || Date.now() - (latest.at || 0) > 600000)) check(false); }
   function close() { isOpen = false; host.style.display = 'none'; root.innerHTML = ''; try { label.focus(); } catch (e) { /* 무시 */ } }
@@ -2123,7 +2233,8 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
   /* 폰(앱)이 확인한 최신 버전을 알려줄 때 */
   function native(v) { if (v) { latest = { v: norm(v), url: (latest && latest.url) || ('https://github.com/' + C.repo + '/releases/latest'), at: Date.now() }; try { localStorage.setItem(KEY, JSON.stringify(latest)); } catch (e) { /* 무시 */ } paint(); } }
 
-  window.AppInfo = { open: open, check: check, native: native, refresh: paint };
+  window.AppInfo = { open: open, check: check, native: native, refresh: paint,
+    backupDone: function (ok, why) { bkDone(!!ok, why); }, backupOpened: function (t) { bkOpened(t); } };
   paint();
   if (C.online && (!latest || Date.now() - (latest.at || 0) > 6 * 3600000)) setTimeout(function () { check(false); }, 1500);
   document.addEventListener('visibilitychange', function () { if (!document.hidden && C.online && latest && Date.now() - (latest.at || 0) > 6 * 3600000) check(false); });
