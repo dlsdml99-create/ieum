@@ -192,6 +192,12 @@ public class MainActivity extends Activity {
     // 홈 화면 위젯의 듣기·말하기·보기 버튼
     private void handleOpen(Intent i) {
         if (i == null) return;
+        // Aero(항공권)에서 다음 여행 나라 말을 받음. 형식이 맞는 코드만 받고, 언어만 바꿈
+        String tl = i.getStringExtra("trip_lang"), tc = i.getStringExtra("trip_cc");
+        if (tl != null && tc != null && tl.matches("[a-z]{2,3}") && tc.matches("[A-Z]{2}")) {
+            i.removeExtra("trip_lang"); i.removeExtra("trip_cc");
+            js("window.ieumTrip&&window.ieumTrip('" + tl + "','" + tc + "')");
+        }
         String w = i.getStringExtra("open");
         if (w == null || !w.matches("listen|speak|see|face|sos|addr")) return;
         i.removeExtra("open");
