@@ -1,10 +1,17 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' file: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: file: https:; media-src 'self' data: blob:; connect-src 'self' https: data: blob:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src https://api.github.com; worker-src 'none'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>이음</title>
+<script>
+/* 버전 번호는 한 곳에서만: 앱(APK)은 폰이 알려 주는 실제 버전, 아니면 빌드할 때 적어 넣는 번호 */
+window.IEUM_VER = function () {
+  try { var v = window.Ieum && window.Ieum.version(); if (v && /^\d+(\.\d+)*$/.test(v)) return v; } catch (e) { /* 미리보기 */ }
+  var b = '__APPVER__';
+  return /^\d+(\.\d+)*$/.test(b) ? b : '1.0';
+};
+</script>
 </head><body>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#1E2125">
 <style>
 /* Layout: one-screen wayfinding board. Graphite sign band (tools + languages) on top, the conversation in the middle, three yellow signs (ear · mouth · eye) as the dock. Full-screen boards for showing things to the other person. */
@@ -80,7 +87,7 @@ p{margin:0}
 .tools{display:flex;gap:2px;flex:none}
 .tool{width:44px;height:46px;display:grid;justify-items:center;align-content:center;gap:3px;border-radius:var(--r);color:var(--on-board)}
 .tool .i{width:20px;height:20px}
-.tool span{font-size:10px;line-height:1;color:var(--board-muted);white-space:nowrap;letter-spacing:-.02em}
+.tool span{font-size:12px;line-height:1;color:var(--board-muted);white-space:nowrap;letter-spacing:-.02em}
 .tool.sos b{font-family:var(--f-sign);font-weight:700;font-size:16px;line-height:20px;letter-spacing:.04em;color:var(--sos-ink)}
 .langs{display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);align-items:center;gap:6px}
 .plate{display:flex;align-items:center;gap:8px;min-width:0;height:46px;padding:0 10px;border-radius:var(--r);border:1px solid var(--board-line);text-align:left}
@@ -104,7 +111,7 @@ p{margin:0}
 .note{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r);font-size:13px;color:var(--muted)}
 .note .i{width:18px;height:18px;margin-top:1px}
 .note p{flex:1;min-width:0}
-.note button{flex:none;font-size:13px;font-weight:700;color:var(--ink);padding:2px 4px}
+.note button{flex:none;min-height:44px;font-size:13px;font-weight:700;color:var(--ink);padding:2px 8px;margin:-10px -4px -10px 0}
 .card{border-radius:var(--r);padding:11px 14px 8px;display:grid;gap:3px;min-width:0}
 .card.speak{background:var(--sign);color:var(--on-sign);margin-left:10%}
 .card.listen{background:var(--board);color:var(--on-board);border:1px solid var(--board-line);margin-right:10%}
@@ -126,17 +133,17 @@ p{margin:0}
 .ffind{display:flex;gap:8px;align-items:center;margin:0 0 10px}
 .ffind-in{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--card,transparent)}
 .ffind-in input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:14px;color:inherit;outline:none}
-.ffind-star{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-weight:700;white-space:nowrap}
+.ffind-star{display:inline-flex;align-items:center;gap:4px;height:44px;padding:0 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-weight:700;white-space:nowrap}
 .ffind-star[aria-pressed="true"]{background:var(--sign,#F5B400);border-color:var(--sign,#F5B400);color:#1a1405}
 .ffind-star[aria-pressed="true"] svg,.act-b.on svg{fill:currentColor}
 .act-b.on{font-weight:700}
 .fnone{padding:24px 8px;text-align:center;font-size:14px;opacity:.75}
-.act-b{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 8px;border-radius:4px;font-size:13px;font-weight:500}
+.act-b{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 8px;border-radius:4px;font-size:13px;font-weight:500}
 .act-b .i{width:18px;height:18px}
 .act-b em{font-style:normal;font-family:var(--f-sign);font-weight:700;background:var(--sign);color:var(--on-sign);border-radius:3px;padding:0 5px;line-height:18px}
 .kick{font-size:11px;font-weight:700;color:var(--board-muted);margin-top:6px}
 .replies{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
-.rchip{height:32px;padding:0 11px;border-radius:4px;border:1px solid var(--board-line);color:var(--on-board);font-size:13px;font-weight:500}
+.rchip{height:40px;padding:0 11px;border-radius:4px;border:1px solid var(--board-line);color:var(--on-board);font-size:13px;font-weight:500}
 .speaking .w1{animation:wave 1s infinite}
 .speaking .w2{animation:wave 1s .25s infinite}
 @keyframes wave{0%,100%{opacity:.2}50%{opacity:1}}
@@ -166,13 +173,13 @@ p{margin:0}
 .phrases{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .phrases::-webkit-scrollbar{display:none}
 .sits{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px}.sits::-webkit-scrollbar{display:none}
-.sits button{flex:none;height:26px;padding:0 10px;border:0;border-radius:13px;background:transparent;color:var(--ink-2,inherit);font:inherit;font-size:12.5px;font-weight:600}
+.sits button{flex:none;height:40px;padding:0 12px;border:0;border-radius:18px;background:transparent;color:var(--ink-2,inherit);font:inherit;font-size:12.5px;font-weight:600}
 .sits button[aria-selected="true"]{background:var(--ink,#111);color:var(--surface,#fff)}
 .tzsug{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-size:13px}
-.tzsug span{flex:1;min-width:0}.tzx{flex:none;width:30px;height:30px;border:0;background:transparent;color:inherit;display:grid;place-items:center}
+.tzsug span{flex:1;min-width:0}.tzx{flex:none;width:44px;height:44px;border:0;background:transparent;color:inherit;display:grid;place-items:center}
 .pron{margin:2px 0 0;font-size:14px;color:var(--muted,#667);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}.pron span{font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
 .chip-hint{font-size:13px;color:var(--muted,#667);white-space:normal;padding:6px 2px}
-.chip{flex:none;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:13px;font-weight:500;white-space:nowrap}
+.chip{flex:none;height:40px;padding:0 11px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:13px;font-weight:500;white-space:nowrap}
 .compose{display:flex;gap:6px;margin:0}
 .field{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:44px;padding:0 4px 0 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
 .field:focus-within{border-color:var(--ink)}
@@ -195,7 +202,18 @@ p{margin:0}
 .sign.rec::after{content:"";position:absolute;inset:-4px;border:2px solid var(--rec);border-radius:11px;animation:ring 1.3s ease-out infinite;pointer-events:none}
 @keyframes ring{from{opacity:.9;transform:scale(.98)}to{opacity:0;transform:scale(1.06)}}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:18px;font-size:11px;color:var(--muted)}
-.ver{font-family:var(--f-sign);font-weight:600;font-size:12px;letter-spacing:.05em}
+.ver{position:relative;font-family:var(--f-sign);font-weight:600;font-size:12px;letter-spacing:.05em;color:var(--muted);padding:0 2px;margin:0;border:0;background:transparent}
+.ver::before{content:"";position:absolute;left:-12px;right:-12px;top:-13px;bottom:-13px}
+.phrases.more,.sits.more{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+.row.stack{flex-wrap:wrap}.row.stack .row-t{flex:1 1 100%}.row.stack .seg{width:100%}.row.stack .seg button{flex:1}
+.seg{flex:none;display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{min-width:56px;height:44px;padding:0 10px;font-size:14px;font-weight:700;color:var(--muted);border-left:1px solid var(--line)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--board);color:var(--sign)}
+.zoomed .plate .nm{display:none}
+.chip.add{border-style:dashed;font-weight:700}
+.set-btn{flex:none;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-weight:700}
+.sos-guess{font-size:12px;font-weight:500;opacity:.85}
 
 /* face to face */
 .face{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;background:var(--board)}
@@ -244,7 +262,7 @@ p{margin:0}
 
 /* show to the other person */
 .big{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;gap:12px;background:var(--sign);color:var(--on-sign);padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px,env(safe-area-inset-left,0px))}
-.big.sos{background:var(--rec);color:var(--on-rec)}
+.big.sos{background:#A8290F;color:var(--on-rec)}
 .big-bar{display:flex;justify-content:space-between}
 .big-b{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 10px;border-radius:var(--r);font-weight:700}
 .big-body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:16px;transition:transform .35s ease}
@@ -383,7 +401,7 @@ p{margin:0}
     <div class="wrap feed-in">
       <div id="feedNote"></div>
       <div class="ffind" id="fFind" hidden>
-        <label class="ffind-in"><svg class="i" data-ic="search"></svg><input id="fQ" type="search" placeholder="기록에서 찾기" aria-label="번역 기록에서 찾기" autocomplete="off"></label>
+        <label class="ffind-in"><svg class="i" data-ic="search"></svg><input id="fQ" type="search" maxlength="60" placeholder="기록에서 찾기" aria-label="번역 기록에서 찾기" autocomplete="off"></label>
         <button class="ffind-star" id="fStar" type="button" aria-pressed="false"><svg class="i" data-ic="star"></svg><span>즐겨찾기</span></button>
       </div>
       <div class="list" id="feedList"></div>
@@ -398,7 +416,7 @@ p{margin:0}
       <form class="compose" id="compose" autocomplete="off">
         <div class="field">
           <span class="mode-chip" id="modeChip" hidden><span id="modeLabel"></span><button type="button" id="modeX" aria-label="입력 방식 되돌리기"><svg class="i" data-ic="close"></svg></button></span>
-          <input id="txt" type="text" enterkeyhint="send" placeholder="글로 써도 돼요 · 언어는 알아서 맞춰요" aria-label="번역할 글">
+          <input id="txt" type="text" maxlength="500" enterkeyhint="send" placeholder="글로 써도 돼요 · 언어는 알아서 맞춰요" aria-label="번역할 글">
         </div>
         <button class="send" id="sendBtn" type="submit" aria-label="번역하기" disabled><svg class="i" data-ic="send"></svg></button>
       </form>
@@ -407,7 +425,7 @@ p{margin:0}
         <button class="sign" id="btnSpeak" type="button"><svg class="i" data-ic="head"></svg><b>말하기</b><small>KO → EN</small></button>
         <button class="sign" id="btnSee" type="button"><svg class="i" data-ic="eye"></svg><b>보기</b><small>글자 → KO</small></button>
       </div>
-      <div class="foot"><span class="ver" id="verTxt">v1.3</span><span id="engineTxt">폰 안에서 번역</span></div>
+      <div class="foot"><button class="ver" id="verTxt" type="button">v</button><span id="engineTxt">폰 안에서 번역</span></div>
     </div>
   </footer>
 </div>
@@ -418,7 +436,7 @@ p{margin:0}
       <p class="fh-lang" id="fThemLang">EN</p>
       <p class="fh-text" id="fThemText"></p>
       <p class="fh-sub" id="fThemSub"></p>
-      <form class="fh-form" id="fThemForm" autocomplete="off"><input id="fThemInput" type="text" enterkeyhint="send" aria-label="상대가 쓰는 칸"><button type="submit" aria-label="보내기"><svg class="i" data-ic="send"></svg></button></form>
+      <form class="fh-form" id="fThemForm" autocomplete="off"><input id="fThemInput" type="text" maxlength="500" enterkeyhint="send" aria-label="상대가 쓰는 칸"><button type="submit" aria-label="보내기"><svg class="i" data-ic="send"></svg></button></form>
       <button class="fh-mic" id="fThemMic" type="button"><svg class="i" data-ic="mic"></svg><span id="fThemMicLabel"></span></button>
     </div>
   </section>
@@ -433,7 +451,7 @@ p{margin:0}
       <p class="fh-text" id="fMeText"></p>
       <p class="fh-sub" id="fMeSub"></p>
       <div class="fh-replies" id="fMeReplies"></div>
-      <form class="fh-form" id="fMeForm" autocomplete="off"><input id="fMeInput" type="text" enterkeyhint="send" aria-label="내가 쓰는 칸"><button type="submit" aria-label="보내기"><svg class="i" data-ic="send"></svg></button></form>
+      <form class="fh-form" id="fMeForm" autocomplete="off"><input id="fMeInput" type="text" maxlength="500" enterkeyhint="send" aria-label="내가 쓰는 칸"><button type="submit" aria-label="보내기"><svg class="i" data-ic="send"></svg></button></form>
       <button class="fh-mic" id="fMeMic" type="button"><svg class="i" data-ic="mic"></svg><span>눌러서 말하기</span></button>
     </div>
   </section>
@@ -471,7 +489,7 @@ p{margin:0}
 <script>
 (() => {
   'use strict';
-  const VER = 'v' + (function () { try { return (window.Ieum && window.Ieum.version()) || '1.0'; } catch (e) { return '1.0'; } })();
+  const VER = 'v' + window.IEUM_VER();
   const $ = (s) => document.querySelector(s);
   document.documentElement.lang = 'ko';
 
@@ -569,42 +587,71 @@ p{margin:0}
 
   /* ---------- emergency numbers (checked against public lists; the app picks the country by itself) ---------- */
   const SOS_COUNTRIES = [
+    ['KR', '한국', [['경찰', '112'], ['구급·소방', '119']]],
     ['JP', '일본', [['경찰', '110'], ['구급·소방', '119']]],
     ['CN', '중국', [['경찰', '110'], ['구급', '120'], ['소방', '119']]],
     ['TW', '대만', [['경찰', '110'], ['구급·소방', '119']]],
     ['HK', '홍콩', [['경찰·구급·소방', '999']]],
     ['MO', '마카오', [['경찰·구급·소방', '999']]],
     ['VN', '베트남', [['경찰', '113'], ['구급', '115'], ['소방', '114']]],
-    ['TH', '태국', [['경찰', '191'], ['구급', '1669'], ['소방', '199']]],
+    ['TH', '태국', [['경찰', '191'], ['관광 경찰 (영어)', '1155'], ['구급', '1669'], ['소방', '199']]],
     ['PH', '필리핀', [['경찰·구급·소방', '911']]],
     ['ID', '인도네시아', [['통합 긴급', '112'], ['경찰', '110'], ['구급', '118']]],
-    ['MY', '말레이시아', [['경찰·구급·소방', '999']]],
+    ['MY', '말레이시아', [['경찰·구급·소방', '999'], ['휴대폰 통합 긴급', '112']]],
+    ['BN', '브루나이', [['경찰', '993'], ['구급', '991'], ['소방', '995']]],
+    ['MM', '미얀마', [['경찰', '199'], ['구급', '192'], ['소방', '191']]],
+    ['MN', '몽골', [['경찰', '102'], ['구급', '103'], ['소방', '101']]],
+    ['NP', '네팔', [['경찰', '100'], ['구급', '102'], ['소방', '101']]],
+    ['LK', '스리랑카', [['경찰', '119'], ['구급', '1990'], ['소방', '110']]],
+    ['MV', '몰디브', [['경찰', '119'], ['구급', '102'], ['소방', '118']]],
+    ['KZ', '카자흐스탄', [['통합 긴급', '112'], ['경찰', '102'], ['구급', '103'], ['소방', '101']]],
+    ['UZ', '우즈베키스탄', [['경찰', '102'], ['구급', '103'], ['소방', '101']]],
     ['SG', '싱가포르', [['경찰', '999'], ['구급·소방', '995']]],
     ['KH', '캄보디아', [['경찰', '117'], ['구급', '119'], ['소방', '118']]],
     ['LA', '라오스', [['경찰', '191'], ['구급', '195'], ['소방', '190']]],
     ['IN', '인도', [['통합 긴급', '112'], ['구급', '108']]],
     ['AE', '아랍에미리트', [['경찰', '999'], ['구급', '998'], ['소방', '997']]],
     ['TR', '튀르키예', [['통합 긴급', '112']]],
+    ['QA', '카타르', [['경찰·구급·소방', '999']]],
+    ['SA', '사우디아라비아', [['통합 긴급', '911'], ['경찰', '999'], ['구급', '997'], ['소방', '998']]],
+    ['IL', '이스라엘', [['경찰', '100'], ['구급', '101'], ['소방', '102']]],
+    ['EG', '이집트', [['경찰', '122'], ['구급', '123'], ['소방', '180']]],
+    ['ZA', '남아프리카공화국', [['경찰', '10111'], ['구급', '10177'], ['휴대폰 통합 긴급', '112']]],
     ['US', '미국', [['경찰·구급·소방', '911']]],
     ['GU', '괌·사이판', [['경찰·구급·소방', '911']]],
     ['CA', '캐나다', [['경찰·구급·소방', '911']]],
+    ['MX', '멕시코', [['경찰·구급·소방', '911']]],
+    ['BR', '브라질', [['경찰', '190'], ['구급', '192'], ['소방', '193']]],
     ['GB', '영국', [['경찰·구급·소방', '999'], ['통합 긴급', '112']]],
+    ['IE', '아일랜드', [['경찰·구급·소방', '112'], ['같은 곳으로 연결', '999']]],
     ['FR', '프랑스', [['통합 긴급', '112'], ['경찰', '17'], ['구급', '15'], ['소방', '18']]],
     ['DE', '독일', [['경찰', '110'], ['구급·소방', '112']]],
     ['IT', '이탈리아', [['통합 긴급', '112']]],
     ['ES', '스페인', [['통합 긴급', '112']]],
     ['PT', '포르투갈', [['통합 긴급', '112']]],
     ['NL', '네덜란드', [['통합 긴급', '112']]],
-    ['CH', '스위스', [['경찰', '117'], ['구급', '144'], ['소방', '118']]],
+    ['CH', '스위스', [['경찰', '117'], ['구급', '144'], ['소방', '118'], ['통합 긴급', '112']]],
+    ['AT', '오스트리아', [['통합 긴급', '112'], ['경찰', '133'], ['구급', '144'], ['소방', '122']]],
+    ['BE', '벨기에', [['통합 긴급', '112'], ['경찰', '101']]],
+    ['CZ', '체코', [['통합 긴급', '112'], ['경찰', '158'], ['구급', '155'], ['소방', '150']]],
+    ['HU', '헝가리', [['통합 긴급', '112']]],
+    ['PL', '폴란드', [['통합 긴급', '112']]],
+    ['GR', '그리스', [['통합 긴급', '112'], ['경찰', '100'], ['구급', '166'], ['소방', '199']]],
+    ['HR', '크로아티아', [['통합 긴급', '112']]],
+    ['DK', '덴마크', [['통합 긴급', '112']]],
+    ['SE', '스웨덴', [['통합 긴급', '112']]],
+    ['NO', '노르웨이', [['경찰', '112'], ['구급', '113'], ['소방', '110']]],
+    ['FI', '핀란드', [['통합 긴급', '112']]],
     ['RU', '러시아', [['통합 긴급', '112']]],
-    ['AU', '호주', [['경찰·구급·소방', '000']]],
+    ['AU', '호주', [['경찰·구급·소방', '000'], ['휴대폰 통합 긴급', '112']]],
     ['NZ', '뉴질랜드', [['경찰·구급·소방', '111']]],
   ].map(([code, ko, nums]) => ({ code, ko, nums }));
   const SOS_BY = Object.fromEntries(SOS_COUNTRIES.map((c) => [c.code, c]));
   const COUNTRY_BY_LANG = { en: 'US', ja: 'JP', zh: 'CN', vi: 'VN', th: 'TH', id: 'ID', ms: 'MY', tl: 'PH', es: 'ES', fr: 'FR', de: 'DE',
     it: 'IT', pt: 'PT', ru: 'RU', tr: 'TR', ar: 'AE', hi: 'IN', nl: 'NL' };
   /* 위급 카드는 '지금 있는 나라' 말로 (현지 사람·경찰이 바로 읽게). 영어권·여러 언어 나라는 영어 */
-  const LANG_BY_COUNTRY = { JP: 'ja', CN: 'zh', TW: 'zh', HK: 'zh', MO: 'zh', VN: 'vi', TH: 'th', PH: 'en', ID: 'id', MY: 'ms', SG: 'en',
+  const LANG_BY_COUNTRY = { KR: 'ko', BN: 'ms', MM: 'en', MN: 'en', NP: 'en', LK: 'en', MV: 'en', KZ: 'ru', UZ: 'ru', QA: 'ar', SA: 'ar', IL: 'en', EG: 'ar',
+    ZA: 'en', MX: 'es', BR: 'pt', IE: 'en', AT: 'de', BE: 'fr', CZ: 'en', HU: 'en', PL: 'en', GR: 'en', HR: 'en', DK: 'en', SE: 'en', NO: 'en', FI: 'en', JP: 'ja', CN: 'zh', TW: 'zh', HK: 'zh', MO: 'zh', VN: 'vi', TH: 'th', PH: 'en', ID: 'id', MY: 'ms', SG: 'en',
     KH: 'en', LA: 'en', IN: 'en', AE: 'ar', TR: 'tr', US: 'en', GU: 'en', CA: 'en', GB: 'en', FR: 'fr', DE: 'de', IT: 'it', ES: 'es',
     PT: 'pt', NL: 'nl', CH: 'de', RU: 'ru', AU: 'en', NZ: 'en' };
   const CONSUL = { label: '영사안전콜센터 · 24시간 한국어', show: '+82-2-3210-0404', dial: '+82232100404' };
@@ -613,7 +660,10 @@ p{margin:0}
   const KEY = 'ieum.';
   const store = {
     get(k, d) { try { const v = localStorage.getItem(KEY + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(KEY + k, JSON.stringify(v)); } catch (e) { /* storage off: keep going */ } },
+    set(k, v) {
+      try { localStorage.setItem(KEY + k, JSON.stringify(v)); return true; }
+      catch (e) { if (!store.warned) { store.warned = true; setTimeout(() => { store.warned = false; }, 15000); try { toast('폰 저장 공간이 부족해서 저장하지 못했어요. 오래된 기록을 지우거나 기록 보관 개수를 줄여 주세요.', 6000); } catch (e2) { /* 화면 준비 전 */ } } return false; }
+    },
   };
   const okItem = (it) => it && typeof it === 'object' && it.status === 'done' && (
     ((it.kind === 'speak' || it.kind === 'listen') && typeof it.orig === 'string' && typeof it.trans === 'string') ||
@@ -625,6 +675,9 @@ p{margin:0}
     slow: store.get('slow', false) === true,
     noteSeen: store.get('noteSeen', false) === true,
     sosCountry: store.get('sosCountry', ''),
+    sosAt: store.get('sosAt', ''),
+    keep: [60, 200, 500].includes(store.get('keep', 200)) ? store.get('keep', 200) : 200,
+    font: [1, 1.15, 1.3].includes(store.get('font', 1)) ? store.get('font', 1) : 1,
     country: '',
     addr: null,
     items: [],
@@ -634,7 +687,7 @@ p{margin:0}
   { const a = store.get('addr', null); if (a && typeof a === 'object' && str(a.address)) S.addr = { name: str(a.name), address: str(a.address), lang: str(a.lang), ko: str(a.ko), phone: str(a.phone) }; }
   /* 즐겨찾기(★)한 기록은 오래돼도 지우지 않고, 나머지는 최근 것만 남긴다 */
   const keepRecent = (arr, n) => { const rest = arr.filter((x) => !x.star); const cut = new Set(rest.slice(0, Math.max(0, rest.length - n))); return arr.filter((x) => !cut.has(x)); };
-  { const saved = store.get('items', []); if (Array.isArray(saved)) S.items = keepRecent(saved.filter(okItem), 60); }
+  { const saved = store.get('items', []); if (Array.isArray(saved)) S.items = keepRecent(saved.filter(okItem), S.keep); }
   let seq = S.items.reduce((m, it) => Math.max(m, +it.id || 0), 0);
   const blobs = new Map();
   const fullURL = new Map();
@@ -655,7 +708,7 @@ p{margin:0}
   function save() {
     clearTimeout(saveT);
     saveT = setTimeout(() => {
-      const done = keepRecent(S.items.filter((it) => it.status === 'done'), 60).map(slim);
+      const done = keepRecent(S.items.filter((it) => it.status === 'done'), S.keep).map(slim);
       let imgs = 0;
       for (let i = done.length - 1; i >= 0; i--) {
         if (done[i].kind === 'see' && done[i].img) { if (imgs >= 8) delete done[i].img; else imgs++; }
@@ -1014,11 +1067,17 @@ p{margin:0}
     const frag = document.createDocumentFragment();
     $('#fFind').hidden = !real;
     if (real) {
-      const q = fQ.trim().toLowerCase();
-      const hit = (it) => (!fOnlyStar || it.star) && (!q || [it.orig, it.trans].concat((it.lines || []).flatMap((l) => [l.o, l.t])).some((t) => String(t || '').toLowerCase().includes(q)));
+      const q = fQ.trim().toLowerCase(), words = q ? q.split(/\s+/) : [];
+      const hit = (it) => {
+        if (fOnlyStar && !it.star) return false;
+        if (!words.length) return true;
+        const all = [it.orig, it.trans, it.pron].concat((it.lines || []).flatMap((l) => [l.o, l.t])).map((t) => String(t || '').toLowerCase()).join('\n');
+        return words.every((w) => all.includes(w));
+      };
       const shown = S.items.filter(hit);
       for (const it of shown) frag.append(cardNode(it, false));
-      if (!shown.length) frag.append(h('p', { class: 'fnone' }, fOnlyStar && !q ? '즐겨찾기한 기록이 없어요. 기록 아래 ☆를 눌러 보세요.' : '찾는 기록이 없어요.'));
+      if (!shown.length) frag.append(h('p', { class: 'fnone' }, fOnlyStar && !q ? '즐겨찾기한 기록이 없어요. 기록 아래 ☆를 눌러 보세요.' : '찾는 기록이 없어요. 띄어 쓴 낱말이 모두 들어간 기록만 보여 줘요.'));
+      else if (words.length || fOnlyStar) frag.prepend(h('p', { class: 'fnone', role: 'status' }, '기록 ' + shown.length + '개를 찾았어요'));
     }
     else if (showEx) {
       frag.append(h('div', { class: 'note' }, ic('eye'), h('p', null, '예시 화면이에요. 내 기록이 아니에요.'),
@@ -1036,7 +1095,7 @@ p{margin:0}
   function addItem(it) {
     it.id = ++seq; it.ts = Date.now();
     S.items.push(it);
-    if (S.items.length > 80) S.items = keepRecent(S.items, 80);
+    if (S.items.length > S.keep + 20) S.items = keepRecent(S.items, S.keep);
     renderFeed(); scrollEnd(); save();
     return it;
   }
@@ -1061,7 +1120,7 @@ p{margin:0}
   }
   function renderNote() {
     let node = null;
-    if (!NB) node = noteBox('alert', '번역 기능을 열지 못했어요. 앱을 껐다 켜 주세요.');
+    if (!NB) node = noteBox('alert', '미리보기에서는 번역이 되지 않아요. 안드로이드 앱을 설치하면 번역·듣기·말하기·보기를 모두 쓸 수 있어요. 자주 쓰는 말(영어·일본어·중국어·베트남어·태국어)은 여기서도 바로 볼 수 있어요.');
     else if (!S.noteSeen) node = noteBox('alert', '처음 쓰는 언어는 번역 팩(언어마다 약 30MB)을 한 번 받아요. 와이파이에 연결되면 고른 언어를 알아서 받아 둬요. 그다음부턴 인터넷 없이도 번역돼요.',
       () => { S.noteSeen = true; store.set('noteSeen', true); renderNote(); });
     feedNote.replaceChildren(...(node ? [node] : []));
@@ -1124,17 +1183,39 @@ p{margin:0}
   let sitI = 0;
   function renderSits() {
     $('#sits').replaceChildren(...SITS.map(([n], i) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(i === sitI), onclick: () => { sitI = i; renderSits(); } }, n)));
+    $('#sits').onscroll = moreHint; $('#phrases').onscroll = moreHint;
     const list = SITS[sitI][1];
     if (list === 'star') {
       const mine = S.items.filter((it) => it.star && it.kind === 'speak' && it.status === 'done' && it.src === S.me && it.dst === S.them);
-      $('#phrases').replaceChildren(...(mine.length ? mine.slice(0, 30).map((x) => h('button', { class: 'chip', type: 'button', onclick: () => {
+      const add = h('button', { class: 'chip add', type: 'button', onclick: addMine }, '＋ 문장 쓰기');
+      $('#phrases').replaceChildren(add, ...(mine.length ? mine.slice(0, 30).map((x) => h('button', { class: 'chip', type: 'button', onclick: () => {
           const it = addItem({ kind: 'speak', src: x.src, dst: x.dst, orig: x.orig, trans: '', status: 'pending' }); finish(it, x.trans); } }, x.orig))
-        : [h('span', { class: 'chip-hint' }, `${nameKo(S.them)} 기록 아래 ☆를 누르면 여기 모여서 한 번에 다시 말할 수 있어요`)]));
-      $('#phrases').scrollLeft = 0; return;
+        : [h('span', { class: 'chip-hint' }, `미리 적어 두거나, ${nameKo(S.them)} 기록 아래 ☆를 누르면 여기 모여요`)]));
+      $('#phrases').scrollLeft = 0; moreHint(); return;
     }
     $('#phrases').replaceChildren(...(list ? list.map((t) => h('button', { class: 'chip', type: 'button', onclick: () => sitPhrase(t) }, t))
       : PHRASES.map((p, i) => h('button', { class: 'chip', type: 'button', onclick: () => phrase(i) }, p))));
-    $('#phrases').scrollLeft = 0;
+    $('#phrases').scrollLeft = 0; moreHint();
+  }
+  /* 옆으로 밀면 더 있다는 표시 (오른쪽 끝을 흐리게) */
+  function moreHint() {
+    for (const el of [$('#phrases'), $('#sits')]) el.classList.toggle('more', el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }
+  /* ⭐ 내 문장: 미리 적어 두기 (번역해서 즐겨찾기에 바로 넣음) */
+  function addMine() {
+    const inp = h('input', { type: 'text', maxlength: '200', enterkeyhint: 'done', placeholder: '예: 땅콩 알레르기가 있어요', 'aria-label': '내 문장' });
+    const ok = h('button', { class: 'set-btn', type: 'submit' }, '번역해서 넣기');
+    const f = h('form', { class: 'form' }, h('label', null, nameKo(S.me) + '로 적어 주세요'), inp,
+      h('p', { class: 'sheet-note' }, nameKo(S.them) + '로 번역해서 ⭐ 내 문장에 넣어 둬요. 다음부터 한 번 눌러 바로 말해요.'), ok);
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const t = inp.value.trim();
+      if (!t) { toast('문장을 적어 주세요.'); inp.focus(); return; }
+      closeSheet();
+      const it = addItem({ kind: 'speak', src: S.me, dst: S.them, orig: t, trans: '', status: 'pending', star: true });
+      runText(it, { silent: true }).then(() => { if (SITS[sitI][1] === 'star') renderSits(); toast(it.status === 'done' ? '⭐ 내 문장에 넣었어요.' : '번역하지 못했어요. 기록에서 다시 해 주세요.'); });
+    });
+    openSheet('⭐ 내 문장 쓰기', f);
   }
   async function sitPhrase(t) {
     const lang = S.them, memo = store.get('sp.' + lang, {}) || {};
@@ -1174,7 +1255,6 @@ p{margin:0}
     lang = String(lang || ''); cc = String(cc || '');
     if (!L[lang] || !/^[A-Z]{2}$/.test(cc)) return;
     if (S.me !== lang && S.them !== lang) chooseLang('them', lang);
-    if (SOS_BY[cc]) { S.sosCountry = cc; store.set('sosCountry', cc); }
     $('#tzSug').hidden = true;
     toast(`Aero에서 다음 여행(${regionKo(cc)})을 받았어요. 상대 언어를 ${nameKo(lang)}로 맞췄어요.`, 4200);
   };
@@ -1745,20 +1825,54 @@ p{margin:0}
   }
 
   /* emergency card */
-  function sosCountry() { return SOS_BY[S.sosCountry] || SOS_BY[S.country] || SOS_BY[COUNTRY_BY_LANG[S.them]] || SOS_BY.US; }
+  /* 지금 있는 나라 짐작: 폰의 통신망·유심·지역 설정 → 시간대 (위치 권한 안 씀). 상대 언어로는 짐작하지 않음 */
+  const TZ_CC = { 'Asia/Seoul': 'KR', 'Asia/Tokyo': 'JP', 'Asia/Shanghai': 'CN', 'Asia/Chongqing': 'CN', 'Asia/Harbin': 'CN', 'Asia/Urumqi': 'CN', 'Asia/Taipei': 'TW',
+    'Asia/Hong_Kong': 'HK', 'Asia/Macau': 'MO', 'Asia/Ho_Chi_Minh': 'VN', 'Asia/Saigon': 'VN', 'Asia/Bangkok': 'TH', 'Asia/Manila': 'PH', 'Asia/Jakarta': 'ID',
+    'Asia/Makassar': 'ID', 'Asia/Jayapura': 'ID', 'Asia/Pontianak': 'ID', 'Asia/Kuala_Lumpur': 'MY', 'Asia/Kuching': 'MY', 'Asia/Singapore': 'SG', 'Asia/Brunei': 'BN',
+    'Asia/Phnom_Penh': 'KH', 'Asia/Vientiane': 'LA', 'Asia/Yangon': 'MM', 'Asia/Rangoon': 'MM', 'Asia/Ulaanbaatar': 'MN', 'Asia/Kathmandu': 'NP', 'Asia/Colombo': 'LK',
+    'Indian/Maldives': 'MV', 'Asia/Almaty': 'KZ', 'Asia/Tashkent': 'UZ', 'Asia/Samarkand': 'UZ', 'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN', 'Asia/Dubai': 'AE',
+    'Asia/Qatar': 'QA', 'Asia/Riyadh': 'SA', 'Asia/Jerusalem': 'IL', 'Asia/Tel_Aviv': 'IL', 'Africa/Cairo': 'EG', 'Africa/Johannesburg': 'ZA', 'Europe/Istanbul': 'TR',
+    'Pacific/Guam': 'GU', 'Pacific/Saipan': 'GU', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE', 'Europe/Rome': 'IT',
+    'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES', 'Europe/Lisbon': 'PT', 'Europe/Amsterdam': 'NL', 'Europe/Zurich': 'CH', 'Europe/Vienna': 'AT', 'Europe/Brussels': 'BE',
+    'Europe/Prague': 'CZ', 'Europe/Budapest': 'HU', 'Europe/Warsaw': 'PL', 'Europe/Athens': 'GR', 'Europe/Zagreb': 'HR', 'Europe/Copenhagen': 'DK',
+    'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI', 'Europe/Moscow': 'RU', 'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU',
+    'Australia/Brisbane': 'AU', 'Australia/Perth': 'AU', 'Australia/Adelaide': 'AU', 'Australia/Darwin': 'AU', 'Australia/Hobart': 'AU', 'Pacific/Auckland': 'NZ',
+    'Pacific/Honolulu': 'US', 'America/Mexico_City': 'MX', 'America/Cancun': 'MX', 'America/Tijuana': 'MX', 'America/Sao_Paulo': 'BR',
+    'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Edmonton': 'CA', 'America/Winnipeg': 'CA', 'America/Halifax': 'CA', 'America/St_Johns': 'CA', 'America/Regina': 'CA',
+    'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Anchorage': 'US',
+    'America/Detroit': 'US', 'America/Boise': 'US', 'America/Indiana/Indianapolis': 'US', 'America/Kentucky/Louisville': 'US' };
+  function autoCountry() {
+    if (SOS_BY[S.country]) return S.country;
+    let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* 모름 */ }
+    if (SOS_BY[TZ_CC[tz]]) return TZ_CC[tz];
+    return '';
+  }
+  /* 직접 고른 나라는, 고를 때와 다른 나라로 옮겨 가면(폰이 알아챔) 저절로 풀림 */
+  function sosCountry() {
+    const a = autoCountry();
+    if (SOS_BY[S.sosCountry] && (!a || S.sosAt === a)) return SOS_BY[S.sosCountry];
+    return SOS_BY[a] || null;
+  }
+  function setSosCountry(cc) {
+    S.sosCountry = cc || ''; S.sosAt = autoCountry();
+    store.set('sosCountry', S.sosCountry); store.set('sosAt', S.sosAt);
+  }
   function dialNum(num) { try { NB.dial(num); } catch (e) { copyText(num, '번호 ' + num + '를 복사했어요.'); } }
   function sosNums(c) {
+    const picked = !!(c && SOS_BY[S.sosCountry] === c && S.sosCountry !== autoCountry());
     const box = h('div', { class: 'sos-nums' },
-      h('div', { class: 'sos-head' }, h('span', null, '긴급 전화'),
-        h('button', { class: 'sos-country', type: 'button', 'aria-label': '나라 바꾸기 (지금 ' + c.ko + ')', onclick: () => countrySheet(() => showSOS()) }, c.ko, ic('chev'))));
-    for (const [lab, num] of c.nums) {
+      h('div', { class: 'sos-head' }, h('span', null, '긴급 전화', h('br'), h('span', { class: 'sos-guess' }, !c ? '지금 있는 나라를 몰라요' : picked ? '직접 고른 나라' : '폰이 알아낸 지금 있는 나라')),
+        h('button', { class: 'sos-country', type: 'button', 'aria-label': c ? '나라 바꾸기 (지금 ' + c.ko + ')' : '나라 고르기', onclick: () => countrySheet(() => showSOS()) }, c ? c.ko : '나라 고르기', ic('chev'))));
+    if (!c) box.append(h('p', { class: 'big-orig' }, '나라를 고르면 그 나라 긴급 번호가 나와요. 한국 112·119는 해외에서 걸리지 않아요.'));
+    for (const [lab, num] of (c ? c.nums : [])) {
       box.append(h('button', { class: 'sos-num', type: 'button', onclick: () => dialNum(num) }, h('span', null, lab), h('b', null, num)));
     }
     box.append(h('button', { class: 'sos-num consul', type: 'button', onclick: () => dialNum(CONSUL.dial) }, h('span', null, CONSUL.label), h('b', null, CONSUL.show)));
     return box;
   }
   async function showSOS() {
-    const local = LANG_BY_COUNTRY[sosCountry().code];
+    const sc = sosCountry();
+    const local = sc ? LANG_BY_COUNTRY[sc.code] : null;
     let lang = local && L[local] && local !== 'ko' ? local : S.them;
     let pb = pbGet(lang), idx = 0;
     /* 현지어와 상대 언어가 다르면 둘 중에 고를 수 있게 */
@@ -1780,7 +1894,7 @@ p{margin:0}
       btns.forEach((b, j) => b.classList.toggle('on', j === i));
       if (say) speak(t, pb ? lang : 'ko', 'sos');
     }
-    openBoard({ tone: 'sos', label: '위급 카드 · ' + sosCountry().ko + (L[lang] ? ' ' + L[lang].native : ''), body: [langBtn, main, sub, h('div', { class: 'sos-lines' }, btns), sosNums(sosCountry())].filter(Boolean),
+    openBoard({ tone: 'sos', label: '위급 카드' + (sc ? ' · ' + sc.ko : '') + (L[lang] ? ' ' + L[lang].native : ''), body: [langBtn, main, sub, h('div', { class: 'sos-lines' }, btns), sosNums(sc)].filter(Boolean),
       foot: [footBtn('speaker', '크게 읽어주기', () => speak(main.textContent, pb ? lang : 'ko', 'sos'), 'sos')] });
     pick(0, false);
     if (!pb && !engineOff()) {
@@ -1789,15 +1903,21 @@ p{margin:0}
     }
   }
   function countrySheet(onPick) {
-    const cur = sosCountry().code;
+    const now = sosCountry(), cur = now ? now.code : '', a = autoCountry();
     const list = h('div', { role: 'radiogroup', 'aria-label': '나라' });
-    for (const c of SOS_COUNTRIES) {
-      const on = c.code === cur;
-      list.append(h('button', { class: 'opt', type: 'button', role: 'radio', 'aria-checked': String(on), onclick: () => {
-        S.sosCountry = c.code; store.set('sosCountry', c.code); closeSheet(); onPick(c);
-      } }, h('span', { class: 'tag' }, c.code), h('span', { class: 'k' }, c.ko), h('span', { class: 'n' }, c.nums.map((n) => n[1]).join(' · ')), on ? ic('check', 'ck') : null));
-    }
-    openSheet('지금 있는 나라', h('div', null, h('p', { class: 'sheet-note' }, '폰이 지금 있는 나라를 알아서 골라요. 다르면 여기서 바꿔 주세요.'), list));
+    const autoOn = !S.sosCountry || cur === a;
+    list.append(h('button', { class: 'opt', type: 'button', role: 'radio', 'aria-checked': String(autoOn), onclick: () => { setSosCountry(''); closeSheet(); onPick(sosCountry()); } },
+      h('span', { class: 'tag' }, '자동'), h('span', { class: 'k' }, '폰이 알아서 고르기'), h('span', { class: 'n' }, a ? '지금 ' + SOS_BY[a].ko : '알아내지 못했어요'), autoOn ? ic('check', 'ck') : null));
+    const q = h('input', { type: 'search', maxlength: '20', placeholder: '나라 이름으로 찾기', 'aria-label': '나라 찾기', style: 'margin:6px 0' });
+    const rows = SOS_COUNTRIES.map((c) => {
+      const on = !autoOn && c.code === cur;
+      const b = h('button', { class: 'opt', type: 'button', role: 'radio', 'aria-checked': String(on), onclick: () => { setSosCountry(c.code); closeSheet(); onPick(c); } },
+        h('span', { class: 'tag' }, c.code), h('span', { class: 'k' }, c.ko), h('span', { class: 'n' }, c.nums.map((n) => n[1]).join(' · ')), on ? ic('check', 'ck') : null);
+      b.dataset.k = (c.ko + ' ' + c.code).toLowerCase();
+      list.append(b); return b;
+    });
+    q.addEventListener('input', () => { const w = q.value.trim().toLowerCase(); rows.forEach((b) => { b.hidden = !!w && !b.dataset.k.includes(w); }); });
+    openSheet('지금 있는 나라', h('div', { class: 'form' }, h('p', { class: 'sheet-note' }, '긴급 번호는 지금 있는 나라를 따라요(상대 언어와 상관없어요). 폰이 알아서 고르고, 다르면 여기서 바꿔 주세요. 다른 나라로 옮겨 가면 다시 알아서 골라요.'), q, list));
   }
 
   /* ---------- face to face ---------- */
@@ -1945,7 +2065,7 @@ p{margin:0}
       b.addEventListener('click', () => { const v = b.getAttribute('aria-checked') !== 'true'; b.setAttribute('aria-checked', String(v)); fn(v); });
       return b;
     };
-    const row = (label, sub, control) => h('div', { class: 'row' }, h('div', { class: 'row-t' }, h('b', null, label), h('small', null, sub)), control);
+    const row = (label, sub, control) => h('div', { class: 'row' + (control && control.classList.contains('seg') ? ' stack' : '') }, h('div', { class: 'row-t' }, h('b', null, label), h('small', null, sub)), control);
     let armed = false, armT = 0;
     const clear = h('button', { class: 'danger', type: 'button' }, '기록 모두 지우기');
     clear.addEventListener('click', () => {
@@ -1959,15 +2079,32 @@ p{margin:0}
       for (const u of fullURL.values()) { try { URL.revokeObjectURL(u); } catch (e) { /* ignore */ } }
       S.items = []; blobs.clear(); fullURL.clear(); save(); renderFeed(); closeSheet(); toast('기록을 지웠어요.');
     });
-    const upd = h('button', { class: 'act-b', type: 'button', onclick: () => { try { NB.openUpdate(); } catch (e) { /* ignore */ } } }, ic('retry'), h('span', null, '확인'));
+    const seg = (opts, cur, fn, label) => {
+      const box = h('div', { class: 'seg', role: 'group', 'aria-label': label });
+      for (const [v, t] of opts) box.append(h('button', { type: 'button', 'aria-pressed': String(v === cur), onclick: () => { fn(v); box.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-pressed', String(opts[i][0] === v))); } }, t));
+      return box;
+    };
+    const sc = sosCountry();
+    const scBtn = h('button', { class: 'set-btn', type: 'button', onclick: () => countrySheet(() => settingsSheet()) }, sc ? sc.ko : '고르기');
+    const verBtn = h('button', { class: 'set-btn', type: 'button', onclick: () => { closeSheet(); if (window.AppInfo) window.AppInfo.open(); } }, '버전 정보');
     openSheet('설정', h('div', null,
       row('말하기 결과 바로 읽어주기', '번역되면 상대 언어로 소리 내 읽어요', sw(S.autoSpeak, (v) => { S.autoSpeak = v; store.set('autoSpeak', v); }, '말하기 결과 바로 읽어주기')),
       row('천천히 읽기', '외국 사람이 알아듣기 쉽게 느리게 읽어요', sw(S.slow, (v) => { S.slow = v; store.set('slow', v); }, '천천히 읽기')),
-      row('새 버전 확인', latestInfo && +latestInfo.latest > +latestInfo.current ? '새 버전 v1.' + latestInfo.latest + '이 나왔어요' : '지금 ' + VER, upd),
+      row('글자 크기', '부모님과 같이 쓸 때 크게', seg([[1, '보통'], [1.15, '크게'], [1.3, '아주 크게']], S.font, (v) => { S.font = v; store.set('font', v); applyFont(); }, '글자 크기')),
+      row('기록 보관 개수', '즐겨찾기(☆)한 기록은 개수와 상관없이 남아요', seg([[60, '60개'], [200, '200개'], [500, '500개']], S.keep, (v) => { S.keep = v; store.set('keep', v); save(); }, '기록 보관 개수')),
+      row('위급 카드 나라', '긴급 번호는 지금 있는 나라를 따라요', scBtn),
+      row('버전 · 새 버전 확인', '지금 ' + VER + ' · 업데이트 내용과 백업도 여기서 봐요', verBtn),
       h('div', { class: 'set-block' }, h('b', null, '홈 화면 위젯'),
         h('small', null, '홈 화면 빈 곳을 길게 누르고 위젯 → 이음을 놓으면, 듣기·말하기·보기를 바로 열 수 있어요.')),
       h('div', { class: 'row' }, clear),
       h('p', { class: 'about' }, '이음 ' + VER + ' · 번역은 폰 안에서 해요. 대화와 사진은 밖으로 보내지 않아요. 언어마다 처음 한 번 번역 팩을 받고, 그다음부턴 인터넷 없이도 번역돼요.')));
+  }
+  /* 글자 크기: 화면 전체를 같은 비율로 키움 (보통·크게·아주 크게) */
+  function applyFont() {
+    const r = document.documentElement;
+    r.style.zoom = S.font === 1 ? '' : String(S.font);
+    r.classList.toggle('zoomed', S.font > 1);
+    moreHint();
   }
 
     /* ---------- copy ---------- */
@@ -1998,6 +2135,7 @@ p{margin:0}
     s.innerHTML = ICONS[s.dataset.ic] || '';
   });
   $('#verTxt').textContent = VER;
+  applyFont();
   renderSits(); tzSuggest();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tzSuggest(); });
   $('#meBtn').addEventListener('click', () => langSheet('me'));
@@ -2068,9 +2206,9 @@ p{margin:0}
 
 
 <!--APPINFO--><script>
-window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.12", "items": ["📦 앱 용량을 절반 가까이 줄였어요: 요즘 폰(64비트)에 맞는 번역 엔진만 넣었어요"]}, {"v": "v1.16", "d": "2026.11.08", "items": ["📖 내장 문장집: 영어·일본어·중국어·베트남어·태국어 문장은 처음부터 인터넷 없이 바로 (식당·호텔·교통·쇼핑·공항·위급)", "🗣️ 한글 발음: 문장집 번역 아래에 '곤니치와'처럼 한글로 읽는 법을 같이 보여줘요", "⭐ 내 문장: 즐겨찾기한 말이 문장 줄 맨 앞 탭에 모여서 한 번에 다시 말해요", "✈️ Aero에서 다음 여행 나라 받기: 항공권 앱 Aero의 '이음으로 준비' 버튼을 누르면 출발 전에 그 나라 말로 바로 맞춰져요"]}, {"v": "v1.15", "d": "2026.11.05", "items": ["보안 강화: 앱 화면이 허락된 곳 말고는 스크립트를 불러오지 못하게 막고, 폰의 다른 파일을 읽지 못하게 하고, 업데이트 파일은 이 앱 저장소 주소에서만 받아요"]}, {"v": "v1.14", "d": "2026.11.05", "items": ["상황별 문장: 식당·호텔·교통·쇼핑·공항 문장을 눌러서 바로 (한 번 번역하면 다음부터 인터넷 없이 바로)", "해외에 가면 폰 시간대를 보고 상대 언어를 그 나라 말로 바꿀지 한 번 물어봐요"]}, {"v": "v1.13", "d": "2026.11.05", "items": ["크게 보기를 열면 밝은 곳에서도 잘 보이게 화면이 가장 밝아져요 (닫으면 원래대로)", "왼쪽 아래 버전 → 내 데이터 백업: 기록을 파일로 저장했다가 새 폰에서 불러오기"]}, {"v": "v1.12", "d": "2026.11.01", "items": ["사진 번역(보기) 카드에도 크게 보기"]}, {"v": "v1.11", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요. 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요.", "backup": {"keys": ["ieum.*"], "bridge": "Ieum"}};
+window.APP_INFO={"name": "이음", "repo": "dlsdml99-create/ieum", "mount": "#verTxt", "notes": [{"v": "current", "d": "2026.11.13", "items": ["🆘 위급 카드의 긴급 번호를 상대 언어가 아니라 '지금 있는 나라'로 골라요. 서울에서 영어를 골라도 미국 911이 아니라 한국 112·119가 나와요", "🌏 나라는 폰이 알아서 고르고(통신망·시간대), 위급 카드나 설정에서 바꿀 수 있어요. 다른 나라로 옮겨 가면 다시 알아서 골라요. 필리핀·싱가포르·호주·영국·캐나다 등 58개 나라 번호를 넣었어요", "🔒 백업 파일을 비밀번호(6글자 이상)로 잠글 수 있어요. 비밀번호를 아는 사람만 열 수 있어요", "🔠 설정에 글자 크기(보통·크게·아주 크게)가 생겼어요", "🗂 기록을 60개에서 200개까지 남겨요(설정에서 60·200·500개). 기록 찾기에 '공항 택시'처럼 여러 낱말을 쓰면 모두 들어간 기록만 보여요", "⭐ 내 문장 탭에서 '＋ 문장 쓰기'로 할 말을 미리 적어 두면 번역해서 바로 넣어 둬요", "🔢 버전 번호가 왼쪽 아래·설정·정보 창 어디서나 같은 번호로 보여요. 새 버전 확인은 버전 정보 창 한 곳에서 해요", "🛡 보안: 폰 자동 백업에 기록이 섞여 나가지 않게 하고, 바깥으로 여는 주소는 이 앱 GitHub 주소만, 앱 화면의 인터넷 연결은 새 버전 확인만 허락했어요", "👀 위쪽 아이콘 글자와 문장 버튼을 키우고, 위급 카드 빨간색을 더 진하게 해서 잘 보이게 했어요. 옆으로 밀면 더 있는 줄은 오른쪽 끝이 흐려져요", "💾 폰 저장 공간이 부족해서 저장하지 못하면 알려 드려요"]}, {"v": "v1.17", "d": "2026.11.12", "items": ["📦 앱 용량을 절반 가까이 줄였어요: 요즘 폰(64비트)에 맞는 번역 엔진만 넣었어요"]}, {"v": "v1.16", "d": "2026.11.08", "items": ["📖 내장 문장집: 영어·일본어·중국어·베트남어·태국어 문장은 처음부터 인터넷 없이 바로 (식당·호텔·교통·쇼핑·공항·위급)", "🗣️ 한글 발음: 문장집 번역 아래에 '곤니치와'처럼 한글로 읽는 법을 같이 보여줘요", "⭐ 내 문장: 즐겨찾기한 말이 문장 줄 맨 앞 탭에 모여서 한 번에 다시 말해요", "✈️ Aero에서 다음 여행 나라 받기: 항공권 앱 Aero의 '이음으로 준비' 버튼을 누르면 출발 전에 그 나라 말로 바로 맞춰져요"]}, {"v": "v1.15", "d": "2026.11.05", "items": ["보안 강화: 앱 화면이 허락된 곳 말고는 스크립트를 불러오지 못하게 막고, 폰의 다른 파일을 읽지 못하게 하고, 업데이트 파일은 이 앱 저장소 주소에서만 받아요"]}, {"v": "v1.14", "d": "2026.11.05", "items": ["상황별 문장: 식당·호텔·교통·쇼핑·공항 문장을 눌러서 바로 (한 번 번역하면 다음부터 인터넷 없이 바로)", "해외에 가면 폰 시간대를 보고 상대 언어를 그 나라 말로 바꿀지 한 번 물어봐요"]}, {"v": "v1.13", "d": "2026.11.05", "items": ["크게 보기를 열면 밝은 곳에서도 잘 보이게 화면이 가장 밝아져요 (닫으면 원래대로)", "왼쪽 아래 버전 → 내 데이터 백업: 기록을 파일로 저장했다가 새 폰에서 불러오기"]}, {"v": "v1.12", "d": "2026.11.01", "items": ["사진 번역(보기) 카드에도 크게 보기"]}, {"v": "v1.11", "d": "2026.11.01", "items": ["위급 카드가 지금 있는 나라 말로 떠요 (일본이면 일본어). 상대 언어로도 바꿀 수 있어요", "번역 기록에서 찾기, 자주 쓰는 번역은 ☆ 즐겨찾기 (오래돼도 안 지워져요)"]}, {"v": "v1.10", "d": "2026.11.01", "items": ["왼쪽 아래 버전을 누르면 앱 정보·업데이트 내용·개인정보를 볼 수 있어요", "새 버전이 나오면 버전 글씨가 노란색으로 바뀌어요"]}, {"v": "v1.8", "d": "2026.11.01", "items": ["첫 앱 버전: 듣기·말하기·보기와 새 기능 7가지", "처음 열면 빈 화면에서 시작 (예시는 '예시 둘러보기'에서만)", "번역·글자 읽기를 폰 안에서, 번역 팩을 한 번 받으면 인터넷 없이도 번역", "카메라로 비추면 글자 위에 번역이 겹쳐 보여요", "환율을 하루 한 번 받고, 지금 있는 나라 통화·긴급 번호를 자동으로", "홈 화면 위젯"]}], "privacy": "대화·사진·기록은 폰 밖으로 보내지 않고 이 기기에만 저장돼요(폰 자동 백업에도 넣지 않아요). 인터넷은 번역 팩·글자 읽기 기능 받기(Google), 환율 받기(open.er-api.com), 새 버전 확인(GitHub)에만 써요.", "backup": {"keys": ["ieum.*"], "bridge": "Ieum"}};
 window.APP_INFO.online=!!window.Ieum;
-window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){return '1.8'}};
+window.APP_INFO.version=function(){return window.IEUM_VER()};
 </script>
 <script>
 /* ───── 앱 정보 창 (모든 앱 공통) ─────
@@ -2162,6 +2300,7 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
     '.nh{display:flex;align-items:baseline;gap:10px}.nh b{font:800 16px ui-monospace,Menlo,monospace}.nh span{color:var(--ink3);font-size:14px}' +
     'ul.notes ul{margin:6px 0 0;padding-left:20px;list-style:circle;color:var(--ink2)}ul.notes ul li{margin:2px 0}' +
     '.hint{margin:0;color:var(--ink2)}' +
+    '.pw{display:block;width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--btn);color:var(--ink);border-radius:12px;padding:12px;font:inherit;font-size:16px;margin:0 0 8px}' +
     'button:focus-visible,a:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}';
   var isOpen = false;
   function statusHTML() {
@@ -2174,7 +2313,32 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
   /* ── 내 데이터 백업: 이 기기에 저장된 것(설정·기록·사진)을 파일 하나로 저장하고 다시 불러오기.
      파일은 사용자가 고른 곳(내 파일·드라이브 등)에만 저장되고, 앱이 인터넷으로 보내지 않는다.
      설정: APP_INFO.backup = { keys:['이름', '접두어*'], idb:[{db, store}], bridge:'Android', save:fn(name,text)->Promise }  ── */
-  var B = C.backup || null, bk = { msg: '', busy: false, pending: null };
+  var B = C.backup || null, bk = { msg: '', busy: false, pending: null, locked: null };
+  var PW_MIN = 6;
+  /* 비밀번호 잠금: 비밀번호로 만든 열쇠(PBKDF2-SHA256 60만 번)로 AES-GCM 256 암호화. 비밀번호와 열쇠는 어디에도 저장하지 않음 */
+  var BLOCK = (function () {
+    var ITER = 600000;
+    function ok() { return !!(window.crypto && crypto.subtle && crypto.getRandomValues && window.TextEncoder && window.TextDecoder); }
+    function b64(u8) { var t = ''; for (var i = 0; i < u8.length; i += 0x8000) t += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(t); }
+    function unb64(t) { var b = atob(String(t || '')), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+    function key(pw, salt, it) {
+      return crypto.subtle.importKey('raw', new TextEncoder().encode(String(pw)), 'PBKDF2', false, ['deriveKey']).then(function (k) {
+        return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: it, hash: 'SHA-256' }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+      });
+    }
+    function seal(text, pw) {
+      var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+      return key(pw, salt, ITER).then(function (k) { return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, k, new TextEncoder().encode(text)); })
+        .then(function (ct) { return { v: 1, it: ITER, s: b64(salt), i: b64(iv), d: b64(new Uint8Array(ct)) }; });
+    }
+    function open(o, pw) {
+      if (!o || typeof o.s !== 'string' || typeof o.i !== 'string' || typeof o.d !== 'string') return Promise.reject(new Error('bad'));
+      var it = Math.floor(+o.it || ITER); if (it < 100000 || it > 5000000) return Promise.reject(new Error('bad'));
+      return key(pw, unb64(o.s), it).then(function (k) { return crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(o.i) }, k, unb64(o.d)); })
+        .then(function (pt) { return new TextDecoder().decode(pt); });
+    }
+    return { ok: ok, seal: seal, open: open };
+  })();
   var bkBridge = function () { var b = B && B.bridge && window[B.bridge]; return b && typeof b.backupSave === 'function' ? b : null; };
   function lsKeys() {
     var out = [];
@@ -2221,17 +2385,25 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
   function bkSet(m, busy) { bk.msg = m; bk.busy = !!busy; if (isOpen) render(); }
   function bkName() { var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; }; return C.name + '-백업-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.json'; }
   function bkSave() {
-    if (bk.busy) return; bkSet('백업 파일을 만드는 중이에요…', true);
+    if (bk.busy) return;
+    var pwEl = root.querySelector('#bk-pw'), pw = pwEl ? pwEl.value : '';
+    if (pw && pw.length < PW_MIN) { bkSet('비밀번호는 ' + PW_MIN + '글자 이상 넣어 주세요.'); return; }
+    bkSet(pw ? '비밀번호로 잠근 백업 파일을 만드는 중이에요…' : '백업 파일을 만드는 중이에요…', true);
     var ls = {}; lsKeys().forEach(function (k) { ls[k] = localStorage.getItem(k); });
     Promise.all((B.idb || []).map(idbDump)).then(function (dumps) {
       var idb = {}; (B.idb || []).forEach(function (d, i) { idb[d.db + '/' + d.store] = dumps[i]; });
-      var text = JSON.stringify({ app: C.name, repo: C.repo, version: cur(), at: new Date().toISOString(), ls: ls, idb: idb }), name = bkName(), br = bkBridge();
-      if (br) { bkSet('저장할 곳을 골라 주세요 (내 파일·드라이브 등)', true); br.backupSave(name, text); return; }
-      if (typeof B.save === 'function') { Promise.resolve(B.save(name, text)).then(function (ok) { bkDone(ok !== false, ok === false ? 'cancel' : ''); }, function () { bkDone(false); }); return; }
-      var blob = new Blob([text], { type: 'application/json' }), f = window.File ? new File([blob], name, { type: 'application/json' }) : null;
-      if (f && navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: name }).then(function () { bkDone(true); }, function (e) { bkDone(false, e && e.name === 'AbortError' ? 'cancel' : ''); }); return; }
-      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000); bkDone(true);
-    }, function () { bkDone(false); });
+      var text = JSON.stringify({ app: C.name, repo: C.repo, version: cur(), at: new Date().toISOString(), ls: ls, idb: idb });
+      if (!pw) { bkWrite(text); return; }
+      return BLOCK.seal(text, pw).then(function (o) { bkWrite(JSON.stringify({ app: C.name, repo: C.repo, version: cur(), at: new Date().toISOString(), enc: 1, lock: o })); });
+    }).catch(function () { bkDone(false); });
+  }
+  function bkWrite(text) {
+    var name = bkName(), br = bkBridge();
+    if (br) { bkSet('저장할 곳을 골라 주세요 (내 파일·드라이브 등)', true); br.backupSave(name, text); return; }
+    if (typeof B.save === 'function') { Promise.resolve(B.save(name, text)).then(function (ok) { bkDone(ok !== false, ok === false ? 'cancel' : ''); }, function () { bkDone(false); }); return; }
+    var blob = new Blob([text], { type: 'application/json' }), f = window.File ? new File([blob], name, { type: 'application/json' }) : null;
+    if (f && navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: name }).then(function () { bkDone(true); }, function (e) { bkDone(false, e && e.name === 'AbortError' ? 'cancel' : ''); }); return; }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000); bkDone(true);
   }
   function bkDone(ok, why) { bkSet(ok ? '백업 파일을 저장했어요. 새 폰에서는 이 화면의 "백업 불러오기"로 넣으면 돼요.' : why === 'cancel' ? '' : '백업 파일을 저장하지 못했어요. 다시 해 주세요.'); }
   function bkOpen() {
@@ -2244,11 +2416,19 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
   function bkOpened(text) {
     if (text == null) { bkSet(''); return; }
     var o = null; try { o = JSON.parse(text); } catch (e) { o = null; }
-    if (!o || typeof o.ls !== 'object' || !o.ls) { bkSet('이 파일은 백업 파일이 아니에요.'); return; }
+    if (o && o.enc === 1 && o.lock && o.repo === C.repo) { bk.locked = o; bk.pending = null; bkSet('비밀번호가 걸린 백업이에요. 저장할 때 넣은 비밀번호를 넣어 주세요.'); return; }
+    if (!o || typeof o.ls !== 'object' || !o.ls) { bkSet(o && o.enc === 1 && o.repo !== C.repo ? '다른 앱의 백업이에요. ' + C.name + ' 백업 파일을 골라 주세요.' : '이 파일은 백업 파일이 아니에요.'); return; }
     if (o.repo !== C.repo) { bkSet('이 파일은 ' + (o.app ? '“' + o.app + '” 앱의' : '다른 앱의') + ' 백업이에요. ' + C.name + ' 백업 파일을 골라 주세요.'); return; }
     bk.pending = o; bkSet('');
   }
   var bkMatch = function (k) { return (B.keys || []).some(function (p) { return k === p || (p.slice(-1) === '*' && String(k).indexOf(p.slice(0, -1)) === 0); }); };
+  function bkUnlock() {
+    var o = bk.locked, el = root.querySelector('#bk-upw'), pw = el ? el.value : '';
+    if (!o) return; if (!pw) { bkSet('비밀번호를 넣어 주세요.'); return; }
+    if (!BLOCK.ok()) { bkSet('이 폰에서는 비밀번호가 걸린 백업을 열 수 없어요.'); return; }
+    bkSet('여는 중이에요…', true);
+    BLOCK.open(o.lock, pw).then(function (plain) { bk.locked = null; bkOpened(plain); }, function () { bkSet('비밀번호가 맞지 않아요.'); });
+  }
   function bkApply() {
     var o = bk.pending; if (!o) return; bkSet('불러오는 중이에요…', true);
     var SP = Storage.prototype, set0 = SP.setItem, rm0 = SP.removeItem, old = {};
@@ -2272,7 +2452,9 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
     return '<p class="lbl">내 데이터 백업</p>' +
       (p ? '<p class="hint">' + esc((when && !isNaN(when) ? (when.getMonth() + 1) + '월 ' + when.getDate() + '일 ' : '') + '백업 (v' + (p.version || '?') + ')') + '을 불러오면 지금 이 폰의 ' + esc(C.name) + ' 기록이 백업 내용으로 바뀌어요.</p>' +
         '<div class="row"><button class="btn main" type="button" data-bk="apply"' + (bk.busy ? ' disabled' : '') + '>불러오기</button><button class="btn" type="button" data-bk="cancel">취소</button></div>'
-      : '<p class="hint">폰을 바꾸거나 앱을 지우기 전에 파일로 저장해 두세요. 파일은 내가 고른 곳에만 저장되고 인터넷으로 보내지 않아요.</p>' +
+      : bk.locked ? '<p class="hint">🔒 비밀번호가 걸린 백업이에요.</p><input class="pw" id="bk-upw" type="password" autocomplete="off" maxlength="40" placeholder="백업 비밀번호" aria-label="백업 비밀번호"><div class="row"><button class="btn main" type="button" data-bk="unlock"' + (bk.busy ? ' disabled' : '') + '>열기</button><button class="btn" type="button" data-bk="cancel">취소</button></div>'
+      : '<p class="hint">폰을 바꾸거나 앱을 지우기 전에 파일로 저장해 두세요. 파일은 내가 고른 곳에만 저장되고 인터넷으로 보내지 않아요. 비밀번호를 넣으면 그 비밀번호를 아는 사람만 열 수 있어요(잊으면 열 수 없어요).</p>' +
+        (BLOCK.ok() ? '<input class="pw" id="bk-pw" type="password" autocomplete="new-password" maxlength="40" placeholder="비밀번호 (선택 · ' + PW_MIN + '글자 이상)" aria-label="백업 비밀번호 (선택)">' : '') +
         '<div class="row"><button class="btn" type="button" data-bk="save"' + (bk.busy ? ' disabled' : '') + '>백업 파일로 저장</button><button class="btn" type="button" data-bk="open"' + (bk.busy ? ' disabled' : '') + '>백업 불러오기</button></div>') +
       (bk.msg ? '<p class="hint" role="status">' + esc(bk.msg) + '</p>' : '');
   }
@@ -2296,7 +2478,7 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
     root.querySelectorAll('[data-x]').forEach(function (b) { b.addEventListener('click', close); });
     var c = root.querySelector('[data-chk]');
     if (c) c.addEventListener('click', function () { check(true); });
-    root.querySelectorAll('[data-bk]').forEach(function (b) { b.addEventListener('click', function () { var k = b.getAttribute('data-bk'); if (k === 'save') bkSave(); else if (k === 'open') bkOpen(); else if (k === 'apply') bkApply(); else { bk.pending = null; bkSet(''); } }); });
+    root.querySelectorAll('[data-bk]').forEach(function (b) { b.addEventListener('click', function () { var k = b.getAttribute('data-bk'); if (k === 'save') bkSave(); else if (k === 'open') bkOpen(); else if (k === 'apply') bkApply(); else if (k === 'unlock') bkUnlock(); else { bk.pending = null; bk.locked = null; bkSet(''); } }); });
   }
   function open() { isOpen = true; host.style.display = 'block'; render(); var sh = root.querySelector('.sheet'); if (sh) sh.focus(); if (C.online && !checking && (!latest || Date.now() - (latest.at || 0) > 600000)) check(false); }
   function close() { isOpen = false; host.style.display = 'none'; root.innerHTML = ''; try { label.focus(); } catch (e) { /* 무시 */ } }
@@ -2313,8 +2495,9 @@ window.APP_INFO.version=function(){try{return window.Ieum.version()}catch(e){ret
     fetch('https://api.github.com/repos/' + C.repo + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' })
       .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
       .then(function (j) {
-        var url = j.html_url || ('https://github.com/' + C.repo + '/releases/latest');
-        (j.assets || []).forEach(function (a) { if (/\.apk$/i.test(a.name) && /^https:\/\/github\.com\//.test(a.browser_download_url)) url = a.browser_download_url; });
+        var own = 'https://github.com/' + C.repo + '/releases/', url = own + 'latest';
+        if (typeof j.html_url === 'string' && j.html_url.indexOf(own) === 0) url = j.html_url;
+        (j.assets || []).forEach(function (a) { if (a && /\.apk$/i.test(a.name) && typeof a.browser_download_url === 'string' && a.browser_download_url.indexOf(own + 'download/') === 0) url = a.browser_download_url; });
         if (j.tag_name) { latest = { v: norm(j.tag_name), url: url, at: Date.now() }; try { localStorage.setItem(KEY, JSON.stringify(latest)); } catch (e) { /* 무시 */ } }
         done();
       })

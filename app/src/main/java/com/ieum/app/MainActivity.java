@@ -136,6 +136,9 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        s.setSupportMultipleWindows(false);
+        s.setGeolocationEnabled(false);
         web.addJavascriptInterface(new Bridge(), "Ieum");
         web.setWebViewClient(new WebViewClient() {
             @Override
@@ -153,8 +156,8 @@ public class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
                 Uri u = req.getUrl();
-                if ("appassets.androidplatform.net".equals(u.getHost())) return false;
-                try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) {}
+                if ("https".equals(u.getScheme()) && "appassets.androidplatform.net".equals(u.getHost())) return false;
+                openSafe(u);
                 return true;
             }
         });
@@ -748,10 +751,20 @@ public class MainActivity extends Activity {
             .setTitle("새 버전이 있어요")
             .setMessage("이음 v1." + latest + "이 나왔어요.\n'업데이트'를 누르면 파일이 받아져요. 다 받으면 파일을 눌러 설치하세요. 기록과 설정은 그대로 남아요.")
             .setPositiveButton("업데이트", (d, w) -> {
-                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (Exception ignored) {}
+                openSafe(Uri.parse(url));
             })
             .setNegativeButton("나중에", null)
             .show();
+    }
+
+    // 바깥으로 여는 주소는 https + 이 앱 GitHub 주소만 (다른 형식·다른 사이트는 열지 않음)
+    private void openSafe(Uri u) {
+        if (u == null || !"https".equals(u.getScheme()) || u.getUserInfo() != null || u.getPort() != -1) return;
+        String host = u.getHost(), path = u.getPath() == null ? "" : u.getPath();
+        boolean ok = "github.com".equals(host) && (path.equals("/dlsdml99-create/ieum") || path.startsWith("/dlsdml99-create/ieum/"))
+            || "dlsdml99-create.github.io".equals(host) && (path.equals("/ieum") || path.startsWith("/ieum/"));
+        if (!ok) return;
+        try { startActivity(new Intent(Intent.ACTION_VIEW, u).addCategory(Intent.CATEGORY_BROWSABLE)); } catch (Exception ignored) {}
     }
 
     // ── 공통 ──

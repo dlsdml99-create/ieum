@@ -137,8 +137,9 @@ async def main():
         # settings + update
         await pg.click('#btnSet'); await pg.wait_for_timeout(100)
         R['settings'] = await ev('document.getElementById("sheetBody").textContent.slice(0, 200)')
-        await pg.click('#sheetBody .act-b >> text=확인')
-        await pg.click('#sheetClose')
+        await pg.click('#sheetBody .set-btn >> text=버전 정보'); await pg.wait_for_timeout(200)
+        R['info_open'] = await ev('getComputedStyle(document.body.lastElementChild).display')
+        await ev('window.onBackKey()')
         # widget entry point
         await ev('window.ieumOpen("listen")'); await pg.wait_for_timeout(300)
         R['calls'] = await ev('window.__calls.map(c => c.join(" ")).filter(c => !c.startsWith("detect"))')

@@ -14,7 +14,11 @@
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_rules"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="ocr_korean,ocr_japanese,ocr_chinese,ocr_devanagari" />
         <activity android:name=".MainActivity" android:exported="true"
@@ -26,7 +30,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".IeumWidget" android:exported="true" android:label="@string/app_name">
+        <!-- 위젯 신호는 시스템이 보내므로 다른 앱에는 열지 않음 -->
+        <receiver android:name=".IeumWidget" android:exported="false" android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
