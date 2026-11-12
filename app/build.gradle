@@ -11,7 +11,7 @@ android {
         versionCode ver
         versionName "1.${ver}"
         // 실제 폰(ARM)용만 넣기: 에뮬레이터용 기계어를 빼서 용량을 줄임
-        ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
+        ndk { abiFilters 'arm64-v8a' }   // 64비트 폰만 (32비트 번역 엔진을 빼서 용량 절반)
     }
     signingConfigs {
         fixed {
