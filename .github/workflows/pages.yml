@@ -15,14 +15,14 @@ jobs:
   site:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: 최신 버전 번호로 페이지 채우기
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
           N=$(gh release view --json tagName -q .tagName | tr -dc 0-9)
           MB=$(gh release view --json assets -q '.assets[] | select(.name=="ieum.apk") | .size' | awk '{printf "%d", $1/1048576}')
           sed -i "s/__N__/$N/g; s/__MB__/$MB/g" site/index.html
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with: { path: site }
   pages:
     needs: site
@@ -30,4 +30,4 @@ jobs:
     environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

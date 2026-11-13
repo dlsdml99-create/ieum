@@ -21,12 +21,12 @@ jobs:
             echo "::error::이 build.yml은 이음(ieum) 저장소용이에요."
             exit 1
           fi
-      - uses: actions/checkout@v6
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
         with:
           gradle-version: '8.7'
       - name: 버전 정하기
@@ -53,7 +53,8 @@ jobs:
           rm -f app/ieum.jks
           cp app/build/outputs/apk/release/app-release.apk ieum.apk
           ls -la ieum.apk
-      # 실패했을 때: 공개 브랜치에 올리지 않고, 비밀값을 지운 로그 요약만 이 실행 화면과 비공개 보관함(3일)에 남김
+      # 실패했을 때: 공개 브랜치에 올리지 않고, 비밀값을 지운 로그 요약만 이 실행 화면과 실행 첨부 파일(3일)에 남김
+      # 주의: 공개 저장소라 실행 첨부 파일은 GitHub에 로그인한 사람은 누구나 받을 수 있음. 그래서 비밀값은 지운 뒤 올림
       - name: 빌드 기록 요약 (실패했을 때만)
         if: failure()
         env:
@@ -71,7 +72,7 @@ jobs:
           open('/tmp/lg/build-summary.log', 'w', encoding='utf-8').write('\n'.join(t.splitlines()[-200:]) + '\n')
           PY
           tail -n 60 /tmp/lg/build-summary.log
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
           name: build-summary
@@ -85,7 +86,7 @@ jobs:
           sed -i "s/__N__/$VER/g; s/__MB__/$MB/g" notes.md site/index.html
           gh release delete "v$VER" --yes --cleanup-tag || true
           gh release create "v$VER" ieum.apk --latest --title "이음 v1.$VER" --notes-file notes.md
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: site
   pages:
@@ -97,4 +98,4 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

@@ -748,7 +748,7 @@ public class MainActivity extends Activity {
     private void showUpdate(long latest, String url) {
         if (isFinishing()) return;
         new AlertDialog.Builder(this)
-            .setTitle("새 버전이 있어요")
+            .setTitle("새 버전이 나왔어요")
             .setMessage("이음 v1." + latest + "이 나왔어요.\n'업데이트'를 누르면 파일이 받아져요. 다 받으면 파일을 눌러 설치하세요. 기록과 설정은 그대로 남아요.")
             .setPositiveButton("업데이트", (d, w) -> {
                 openSafe(Uri.parse(url));
